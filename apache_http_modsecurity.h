@@ -30,7 +30,6 @@ void *apache_http_modsecurity_create_main_conf(apr_pool_t* pool, server_rec* svr
 static void* apache_http_modsecurity_merge_loc_conf(apr_pool_t* pool, void* parent, void* child);
 const char  *apache_http_modsecurity_set_remote_server(cmd_parms *cmd, void *cfg, const char *p1, const char *p2);
 
-//static int pre_con(conn_rec *c);
 static void *FilterInCreateServerConfig(apr_pool_t *p, server_rec *s);
 static void *FilterOutCreateServerConfig(apr_pool_t *p, server_rec *s);
 static const char *FilterInEnable(cmd_parms *cmd, void *dummy, int arg);
@@ -42,6 +41,7 @@ static void OutputFilter(request_rec *r);
 
 typedef struct {
     ModSecurity *modsec;
+    Transaction *transaction;
 } apache_http_modsecurity_main_conf_t;
 
 typedef struct {
@@ -64,4 +64,3 @@ typedef struct
 {
     apr_bucket_brigade *pbbTmp;
 } FilterContext;
-
