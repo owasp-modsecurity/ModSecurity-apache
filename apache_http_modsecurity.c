@@ -86,7 +86,17 @@ static void *apache_http_modsecurity_merge_loc_conf(apr_pool_t *pool, void *pare
 
 void *apache_http_modsecurity_create_main_conf(apr_pool_t *pool, server_rec *svr) {
     
-   // return 1;
+   apache_http_modsecurity_main_conf_t *md; 
+   md = (apache_http_modsecurity_main_conf_t *) apr_palloc(pool, sizeof(apache_http_modsecurity_main_conf_t));
+   if (md == NULL) {
+        fprintf(stderr, "Couldn't allocate space for our main specific configurations");
+        return NULL;
+    }
+    
+    md->modsec = NULL;
+    md->transaction = NULL;
+    md->modsec = msc_init();
+    return md;
 
 }
 
@@ -192,6 +202,11 @@ static int input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
     conn_rec *c = r->connection;
     FilterContext *pCtx;
     apr_status_t ret;
+    
+    apache_http_modsecurity_main_conf_t *md = ap_get_module_config(r->server->module_config, &security3_module);
+    apache_http_modsecurity_loc_conf_t *cf = ap_get_module_config(r->server->module_config, &security3_module);
+
+    md->transaction = msc_new_transaction(md->modsec, cf->rules_set, NULL);
 
     if (!(pCtx = f->ctx)) {
         f->ctx = pCtx = apr_palloc(r->pool, sizeof *pCtx);
@@ -227,11 +242,15 @@ static int input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
         for (n=0 ; n < len ; ++n) {
             buf[n] = data[n];
         }
+        
+        msc_append_request_body(md->transaction, *buf, len); 	
 
         pbktOut = apr_bucket_heap_create(buf, len, 0, c->bucket_alloc);
         APR_BRIGADE_INSERT_TAIL(pbbOut, pbktOut);
         apr_bucket_delete(pbktIn);
     }
+    msc_process_request_body(md->transaction);
+    msc_process_logging(md->transaction);
 
     return APR_SUCCESS;
 }
@@ -244,6 +263,13 @@ static int output_filter(ap_filter_t *f, apr_bucket_brigade *pbbIn) {
     apr_bucket_brigade *pbbOut;
 
     pbbOut = apr_brigade_create(r->pool, c->bucket_alloc);
+    
+    
+    apache_http_modsecurity_main_conf_t *md = ap_get_module_config(r->server->module_config, &security3_module);
+    apache_http_modsecurity_loc_conf_t *cf = ap_get_module_config(r->server->module_config, &security3_module);
+
+    md->transaction = msc_new_transaction(md->modsec, cf->rules_set, NULL);  
+      
     for (pbktIn = APR_BRIGADE_FIRST(pbbIn);
          pbktIn != APR_BRIGADE_SENTINEL(pbbIn);
          pbktIn = APR_BUCKET_NEXT(pbktIn))
@@ -266,11 +292,15 @@ static int output_filter(ap_filter_t *f, apr_bucket_brigade *pbbIn) {
         for (n=0 ; n < len ; ++n) {
             buf[n] = data[n];
         }
+        
+        msc_append_response_body(md->transaction, *buf, len); 	
 
         pbktOut = apr_bucket_heap_create(buf, len, apr_bucket_free,
                                          c->bucket_alloc);
         APR_BRIGADE_INSERT_TAIL(pbbOut, pbktOut);
     }
+    msc_process_response_body(md->transaction);
+    msc_process_logging(md->transaction);
 
     apr_brigade_cleanup(pbbIn);
     return ap_pass_brigade(f->next, pbbOut);
@@ -285,4 +315,4 @@ module AP_MODULE_DECLARE_DATA security3_module =
                 NULL,            // Merge handler for per-server configurations
                 module_directives,
                 register_hooks
-        };
+};
