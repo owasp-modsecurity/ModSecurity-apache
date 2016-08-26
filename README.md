@@ -19,6 +19,13 @@ The security3.conf file has Apache Configuration and Directives with comments wh
 [The TODO List]
 (https://github.com/tahirramzan/ModSecurity-apache/blob/master/TODO.md)
 
+#Considerations, Concerns and Confusions
+1-> For headers extraction there are too many options; but we can get those on both input filter and output filter as part of request_rec struct (headers_in and headers_out), I found several functions but no one is looking appropriate to me for libModSec as required by analyzing existing modules.
+
+2-> For process connection there are also too many possibilities; IP address vs host address (client and server) which is also confusing that at which point what thing is needed, IP address or Host address or need to process both with two times use of process connection function.
+
+3-> For configuration, I am also puzzled that what is appropriate or , I think connector should work on whole server that whatever come in and go out needs to process with libModSec.
+
 #Contribute
 Anyone from the community is most welcomed to contribute to this project especially in testing and debugging.
 
