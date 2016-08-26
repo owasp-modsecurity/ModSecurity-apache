@@ -19,6 +19,35 @@ const char *apache_http_modsecurity_set_remote_server(cmd_parms *cmd,
     return NULL;
 }
 
+
+const char *apache_http_modsecurity_set_file_path(cmd_parms *cmd,
+        void *cfg,
+        const char *p)
+{
+    apache_http_modsecurity_loc_conf_t *cf = (apache_http_modsecurity_loc_conf_t *) cfg;
+    if (cf == NULL)
+    {
+        return "ModSecurity's remote_server processing directive didn't get an instance.";
+    }
+
+    cf->rules_set = msc_create_rules_set();
+    cf->rules_file = NULL;
+    cf->rules_remote_server = NULL;
+    cf->rules_remote_key = NULL;
+    cf->enable = 1;
+    cf->id = 0;
+    fprintf(stderr, "ModSecurity creating a location configurationn\n");
+    char uri[100] ;
+    strcpy(uri,p);
+    const char *err = NULL;
+    int ret = msc_rules_add_file(cf->rules_set, uri, &err);
+    fprintf(stderr, "Total Rules '%d' \n",ret);
+    msc_rules_dump(cf->rules_set);
+
+    return NULL;
+}
+
+
 static void *apache_http_modsecurity_merge_loc_conf(apr_pool_t *pool,
         void *parent,
         void *child)
@@ -28,7 +57,7 @@ static void *apache_http_modsecurity_merge_loc_conf(apr_pool_t *pool,
     apache_http_modsecurity_loc_conf_t *c = NULL;
     apache_http_modsecurity_loc_conf_t *conf = apr_palloc(pool,
             sizeof(apache_http_modsecurity_loc_conf_t));
-            
+
     p = parent;
     c = child;
     conf = p;
@@ -121,18 +150,18 @@ void *apache_http_modsecurity_create_loc_conf(apr_pool_t *mp, char *path)
         return NULL;
     }
 
-    cf->rules_set = msc_create_rules_set();
-    cf->rules_file = NULL;
-    cf->rules_remote_server = NULL;
-    cf->rules_remote_key = NULL;
-    cf->enable = 1;
-    cf->id = 0;
-    fprintf(stderr, "ModSecurity creating a location configurationn\n");
-    char uri[] = "/opt/ModSecurity/examples/multiprocess_c/basic_rules.conf";
-    const char *err = NULL;
-    int ret = msc_rules_add_file(cf->rules_set, uri, &err);
-    fprintf(stderr, "Total Rules '%d' \n",ret);
-    msc_rules_dump(cf->rules_set);
+    /* cf->rules_set = msc_create_rules_set();
+     cf->rules_file = NULL;
+     cf->rules_remote_server = NULL;
+     cf->rules_remote_key = NULL;
+     cf->enable = 1;
+     cf->id = 0;
+     fprintf(stderr, "ModSecurity creating a location configurationn\n");
+     char uri[] = "/opt/ModSecurity/examples/multiprocess_c/basic_rules.conf";
+     const char *err = NULL;
+     int ret = msc_rules_add_file(cf->rules_set, uri, &err);
+     fprintf(stderr, "Total Rules '%d' \n",ret);
+     msc_rules_dump(cf->rules_set);*/
 
     return cf;
 }
@@ -148,25 +177,25 @@ static void register_hooks(apr_pool_t *pool)
 
 static void OutputFilter(request_rec *r)
 {
-    FilterConfig *pConfig = ap_get_module_config(r->server->module_config, 
-    &security3_module);
+    FilterConfig *pConfig = ap_get_module_config(r->server->module_config,
+                            &security3_module);
 
     if (!pConfig->oEnabled)
-        {
-			return;
-		}
+    {
+        return;
+    }
 
     ap_add_output_filter("OUT", NULL, r, r->connection);
 }
 
 static void InputFilter(request_rec *r)
 {
-    FilterConfig *pConfig = ap_get_module_config(r->server->module_config, 
-    &security3_module);
+    FilterConfig *pConfig = ap_get_module_config(r->server->module_config,
+                            &security3_module);
     if (!pConfig->iEnabled)
-        {
-			return;
-		}
+    {
+        return;
+    }
 
     ap_add_input_filter("IN", NULL, r, r->connection);
 }
@@ -175,11 +204,11 @@ static int modsec_handler(request_rec *r)
 {
 
 
-    if (!r->handler || strcmp(r->handler, "security3_module")) 
+    if (!r->handler || strcmp(r->handler, "security3_module"))
     {
-		return (DECLINED);
-	}
-	
+        return (DECLINED);
+    }
+
     ap_rputs("Welcome to ModSec!<br/>", r);
     fprintf(stderr, "Welcome to ModSec!\n");
     return OK;
@@ -253,9 +282,9 @@ static int input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
 
         ret=apr_bucket_read(pbktIn, &data, &len, eBlock);
         if (ret != APR_SUCCESS)
-            {
-				return ret;
-			}
+        {
+            return ret;
+        }
 
         buf = ap_malloc(len);
         for (n=0 ; n < len ; ++n)
