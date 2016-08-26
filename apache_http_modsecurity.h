@@ -31,7 +31,8 @@ void *apache_http_modsecurity_create_loc_conf(apr_pool_t *mp, char *path);
 void *apache_http_modsecurity_create_main_conf(apr_pool_t* pool, server_rec* svr);
 static void* apache_http_modsecurity_merge_loc_conf(apr_pool_t* pool, void* parent, void* child);
 const char  *apache_http_modsecurity_set_remote_server(cmd_parms *cmd, void *cfg, const char *p1,
-        const char *p2);
+                                                       const char *p2);
+const char *apache_http_modsecurity_set_file_path(cmd_parms *cmd, void *cfg, const char *p);
 
 static void *FilterInCreateServerConfig(apr_pool_t *p, server_rec *s);
 static void *FilterOutCreateServerConfig(apr_pool_t *p, server_rec *s);
