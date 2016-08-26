@@ -21,6 +21,12 @@ const command_rec module_directives[] =
     OR_OPTIONS,
     "Load ModSecurity rules from a remote server"),
 
+    AP_INIT_TAKE1("modsecurity_rules_path",
+    apache_http_modsecurity_set_file_path,
+    NULL,
+    OR_OPTIONS,
+    "Load ModSecurity rules from a path"),
+
     AP_INIT_TAKE1("modsecurity_rules",
     ap_set_string_slot,
     (void *) APR_OFFSETOF(apache_http_modsecurity_loc_conf_t, rules),
