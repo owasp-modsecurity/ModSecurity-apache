@@ -101,6 +101,8 @@ review work, and our QA integration. GitHub provides an excellent
 documentation on how to perform “Pull Requests”. More information available
 here: https://help.github.com/articles/using-pull-requests/
 
+Please respect the coding style. Pull requests can include various commits, so provide one fix or one piece of functionality per commit. Please do not change anything outside the scope of your target work (e.g. coding style in a function that you have passed by). For further information about the coding style used in this project, please check: https://www.chromium.org/blink/coding-style
+
 Please respect the coding style in use. Pull requests can include various commits, so
 provide one fix or one functionality per commit. Do not change anything outside
 the scope of your target work (e.g. coding style in a function that you have
