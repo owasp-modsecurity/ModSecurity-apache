@@ -1,3 +1,19 @@
 ACLOCAL_AMFLAGS = -I build
-#bin_PROGRAMS = hello
-#hello_SOURCES = hello.c
+
+MAINTAINERCLEANFILES = \
+	config.log \
+        Makefile.in \
+        aclocal.m4 \
+        compile \
+        configure \
+        install-sh \
+        missing \
+        modsec-shared-collections \
+        modsec-shared-collections-lock
+
+
+test:
+	echo "test"
+
+
+.PHONY: test

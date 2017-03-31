@@ -12,7 +12,12 @@ AX_PROG_APACHE()
 AC_SUBST(APXS)
 AC_SUBST(V3LIB)
 AC_SUBST(V3INCLUDE)
-AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([build/apxs-wrapper], [chmod +x build/apxs-wrapper])
+AC_CONFIG_FILES([\
+	Makefile \
+	build/apxs-wrapper \
+])
+
+#[chmod +x build/apxs-wrapper])
+
 AC_PROG_CC
 AC_OUTPUT
