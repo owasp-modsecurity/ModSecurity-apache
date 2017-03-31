@@ -1,2 +1,6 @@
 *.so
 *.o
+*.la
+*.lai
+.libs/*
+src/.libs/*
