@@ -12,8 +12,10 @@ MAINTAINERCLEANFILES = \
         modsec-shared-collections-lock
 
 
-test:
-	echo "test"
+
+all:
+	chmod +x build/apxs-wrapper
+	build/apxs-wrapper
 
 
-.PHONY: test
+.PHONY: all
