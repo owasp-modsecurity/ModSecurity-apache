@@ -77,7 +77,7 @@ static void *apache_http_modsecurity_merge_loc_conf(apr_pool_t *pool,
         fprintf(stderr, "Loading rules from: '%s'", c->rules_remote_server);
         if (res < 0)
         {
-            fprintf("Failed to load the rules from: '%s'  - reason: '%s'", c->rules_remote_server, error);
+            fprintf(stderr, "Failed to load the rules from: '%s'  - reason: '%s'", c->rules_remote_server, error);
 
             return strdup(error);
         }
@@ -88,11 +88,11 @@ static void *apache_http_modsecurity_merge_loc_conf(apr_pool_t *pool,
     {
         int res;
         const char *error = NULL;
-        res = msc_rules_add_file(c->rules_set, c->rules_set, &error);
-        fprintf(stderr, "Loading rules from: '%s'", c->rules_set);
+        res = msc_rules_add_file(c->rules_set, c->rules_file, &error);
+        fprintf(stderr, "Loading rules from: '%s'", c->rules_file);
         if (res < 0)
         {
-            fprintf(stderr, "Failed to load the rules from: '%s' - reason: '%s'", c->rules_set, error);
+            fprintf(stderr, "Failed to load the rules from: '%s' - reason: '%s'", c->rules_file, error);
             return strdup(error);
         }
         fprintf(stderr, "Loaded '%d' rules.", res);
@@ -132,7 +132,7 @@ void *apache_http_modsecurity_create_main_conf(apr_pool_t *pool, server_rec *svr
     const char *str1 = "APACHE";
 
     msc_set_connector_info(md->modsec, str1);
-    char *str2 = msc_who_am_i(md->modsec);
+    const char *str2 = msc_who_am_i(md->modsec);
     fprintf(stderr, "WMI '%s' \n", str2	);
 
     return md;
@@ -270,7 +270,7 @@ static int input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
         apr_bucket *pbktOut;
         const char *data;
         apr_size_t len;
-        char *buf;
+        unsigned char *buf;
         apr_size_t n;
 
         if (APR_BUCKET_IS_EOS(pbktIn))
@@ -292,7 +292,7 @@ static int input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
             buf[n] = data[n];
         }
 
-        msc_append_request_body(md->transaction, *buf, len);
+        msc_append_request_body(md->transaction, buf, len);
         fprintf(stderr, "req app\n");
 
 
@@ -332,7 +332,7 @@ static int output_filter(ap_filter_t *f, apr_bucket_brigade *pbbIn)
     {
         const char *data;
         apr_size_t len;
-        char *buf;
+        unsigned char *buf;
         apr_size_t n;
         apr_bucket *pbktOut;
 
@@ -351,7 +351,7 @@ static int output_filter(ap_filter_t *f, apr_bucket_brigade *pbbIn)
             buf[n] = data[n];
         }
 
-        msc_append_response_body(md->transaction, *buf, len);
+        msc_append_response_body(md->transaction, buf, len);
         fprintf(stderr, "res app\n");
 
         pbktOut = apr_bucket_heap_create(buf, len, apr_bucket_free,
