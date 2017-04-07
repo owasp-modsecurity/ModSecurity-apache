@@ -11,11 +11,17 @@ MAINTAINERCLEANFILES = \
         modsec-shared-collections \
         modsec-shared-collections-lock
 
+CLEANFILES = \
+	t/logs \
+	t/conf \
+	t/htdocs
 
 
 all:
 	chmod +x build/apxs-wrapper
 	build/apxs-wrapper
 
+test:
+	cd t/ && ./TEST.PL
 
 .PHONY: all
