@@ -13,8 +13,7 @@ MAINTAINERCLEANFILES = \
 
 CLEANFILES = \
 	t/logs \
-	t/conf \
-	t/htdocs
+	t/conf
 
 
 all:
