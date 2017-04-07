@@ -64,9 +64,10 @@ static void *apache_http_modsecurity_merge_loc_conf(apr_pool_t *pool,
     fprintf(stderr, "Rules set: '%p'\n", conf->rules_set);
     if (p->rules_set != NULL)
     {
+	const char *error = NULL;
         fprintf(stderr, "We have parental data");
         fprintf(stderr, "Parent is not null, so we have to merge this configurations");
-        msc_rules_merge(c->rules_set, p->rules_set);
+        msc_rules_merge(c->rules_set, p->rules_set, &error);
     }
 
     if (c->rules_remote_server != NULL)
