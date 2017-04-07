@@ -13,10 +13,15 @@ addons:
     packages:
     - libyajl-dev
     - libgeoip-dev
-    - liblmdb-deva
-    - apache2
+    - liblmdb-dev
+    - apache2-bin
+    - apache2-data
+    - apache2-dev
 
 before_script:
+  - curl -L https://cpanmin.us | sudo perl - --sudo App::cpanminus
+  - sudo cpanm --quiet --notest --skip-satisfied CGI::Cookie
+  - sudo cpanm --quiet --notest --skip-satisfied Apache::TestRun
   - cd ..
   - git clone https://github.com/SpiderLabs/ModSecurity.git
   - cd ModSecurity
@@ -27,7 +32,10 @@ before_script:
   - ./configure --without-lmdb
   - make
   - sudo make install
-  - cd ..
+  - pwd
+  - cd -
+  - cd ModSecurity-apache
+  - pwd
 
 script:
     - t/TEST.PL
