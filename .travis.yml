@@ -1,0 +1,34 @@
+sudo: required
+dist: trusty
+
+os: linux
+
+language: c
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    packages:
+    - libyajl-dev
+    - libgeoip-dev
+    - liblmdb-deva
+    - apache2
+
+before_script:
+  - cd ..
+  - git clone https://github.com/SpiderLabs/ModSecurity.git
+  - cd ModSecurity
+  - git checkout v3/master
+  - git submodule init
+  - git submodule update
+  - ./build.sh
+  - ./configure --without-lmdb
+  - make
+  - sudo make install
+  - cd ..
+
+script:
+    - t/TEST.PL
+
