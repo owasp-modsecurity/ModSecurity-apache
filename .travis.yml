@@ -14,15 +14,25 @@ addons:
     - libyajl-dev
     - libgeoip-dev
     - liblmdb-dev
+    - apache2
     - apache2-bin
     - apache2-data
+    - apache2-dbg
     - apache2-dev
+    - apache2-mpm-prefork
 
 before_script:
   - curl -L https://cpanmin.us | sudo perl - --sudo App::cpanminus
+  - cd ..
+  - curl https://www.apache.org/dist/httpd/httpd-2.4.25.tar.gz > httpd-2.4.25.tar.gz
+  - tar xvzf httpd-2.4.25.tar.gz
+  - cd httpd-2.4.25
+  - ./configure  --with-mpm=worker
+  - make -j4
+  - sudo make install
+  - cd -
   - sudo cpanm --quiet --notest --skip-satisfied CGI::Cookie
   - sudo cpanm --quiet --notest --skip-satisfied Apache::TestRun
-  - cd ..
   - git clone https://github.com/SpiderLabs/ModSecurity.git
   - cd ModSecurity
   - git checkout v3/master
@@ -38,5 +48,5 @@ before_script:
   - pwd
 
 script:
-    - t/TEST.PL
+    - t/TEST.PL -apxs /usr/local/apache2/bin/apxs
 
