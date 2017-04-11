@@ -21,12 +21,16 @@ addons:
     - apache2-dev
     - apache2-mpm-prefork
 
+env:
+  - VER_APACHE=2.2.32
+  - VER_APACHE=2.4.25
+
 before_script:
   - curl -L https://cpanmin.us | sudo perl - --sudo App::cpanminus
   - cd ..
-  - curl https://www.apache.org/dist/httpd/httpd-2.4.25.tar.gz > httpd-2.4.25.tar.gz
-  - tar xvzf httpd-2.4.25.tar.gz
-  - cd httpd-2.4.25
+  - curl https://www.apache.org/dist/httpd/httpd-${VER_APACHE}.tar.gz > httpd-${VER_APACHE}.tar.gz
+  - tar xvzf httpd-${VER_APACHE}.tar.gz
+  - cd httpd-${VER_APACHE}
   - ./configure  --with-mpm=worker
   - make -j4
   - sudo make install
