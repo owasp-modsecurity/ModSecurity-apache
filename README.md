@@ -1,11 +1,16 @@
-# Introduction
+
+<img src="https://github.com/SpiderLabs/ModSecurity/raw/v3/master/others/modsec.png" width="50%">
+
+[![Build Status](https://travis-ci.org/SpiderLabs/ModSecurity-apache.svg?branch=master)](https://travis-ci.org/SpiderLabs/ModSecurity-apache)
+[![](https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png)](https://zenhub.com)
+
 
 The ModSecurity-apache connector is the connection point between Apache and libmodsecurity (ModSecurity v3). Said another way, this project provides a communication channel between Apache and libmodsecurity. This connector is required to use LibModSecurity with Apache. 
 
 The ModSecurity-apache connector takes the form of an Apache module. The module simply serves as a layer of communication between Apache and ModSecurity.
 
 Notice that this project depends on libmodsecurity rather than ModSecurity (version 2.9 or less).
-libmodsecurity has not reached a stable release candidate, thus, use this project with caution.
+
 
 ### What is the difference between this project and the old ModSecurity module for Apache?
 
@@ -21,71 +26,11 @@ You can download it from the ModSecurity git repository. For information pertain
 
 With libmodsecurity installed, you can proceed with the installation of the ModSecurity-apache connector. Run the following commands:
 
-      `export LD_LIBRARY_PATH=/usr/local/modsecurity/lib`
-      
-      `sudo apxs -i -a -c -I /opt/ModSecurity/headers -L /opt/ModSecurity/src/.libs/ -lmodsecurity apache_http_modsecurity.c config.c`
-
-
-#Apache Settings 
-The security3.conf file has Apache Configuration and Directives with comments which need to be placed in /etc/apache2/mods-enabled folder. 
-
-# Usage
-
-It is important to note that while the SecRule langugue still is used to configure ModSecurity, it can no longer be *directly* included in an Apache configuration file, instead the ModSecurity-Apache connector provides four new Apache configuration directives that will allow you to configure the state of the module and where the ModSecurity specific configuration files reside. The four directives are:
-
-modsecurity [On|Off] - This directive turns on or off ModSecurity functionality. It will enable or disable the ModSecurity module.
-
-modsecurity_rules_file [<path to rules file>] - This directive indicates the location of the modsecurity configuartion file.
-
-modsecurity_rules_remote [server-key] [<url to rules>] - This directive is used to indicate from where (on the internet) a modsecurity configuration file will be downloaded. It also specifies the key that will be used to authenticate to that server.
-
-modsecurity_rules [<modsecurity rule>] - This directive allows for the direct inclusion of a ModSecurity rule into the Apache configuration.
-
-
-### Usage example: injecting rules within Apache configuration
 ```
-...
-modsecurity on;
-location / {
-  modsecurity_rules '
-    SecRuleEngine On
-    SecDebugLog /tmp/modsec_debug.log
-    SecDebugLogLevel 9
-    SecRule ARGS "@contains test" "id:1,phase:2,t:trim,block"
-  ';
-}
-...
-```
-
-### Usage example: loading rules from a file and injecting specific configurations per directory/alias
-```
-...
-modsecurity on;
-location / {
-  root /var/www/html;
-  modsecurity_rules_file /etc/my_modsecurity_rules.conf;
-}
-location /ops {
-  root /var/www/html/opts;
-  modsecurity_rules '
-    SecRuleEngine On
-    SecDebugLog /tmp/modsec_debug.log
-    SecDebugLogLevel 9
-    SecRuleRemoveById 10
-  ';
-}
-...
-```
-
-### Usage example: loading rules from a remote server
-```
-...
-modsecurity on;
-location / {
-  root /var/www/html;
-  modsecurity_rules_remote my-server-key https://my-own-server/rules/download;
-}
-...
+$ ./autogen.sh
+$ ./configure
+$ make
+$ sudo make install
 ```
 
 # Contributing
