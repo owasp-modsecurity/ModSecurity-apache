@@ -52,5 +52,5 @@ before_script:
   - pwd
 
 script:
-    - t/TEST.PL -apxs /usr/local/apache2/bin/apxs
+    - t/TEST -apxs /usr/local/apache2/bin/apxs
 

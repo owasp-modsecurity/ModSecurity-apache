@@ -21,6 +21,6 @@ all:
 	build/apxs-wrapper
 
 test:
-	cd t/ && ./TEST.PL
+	cd t/ && ./TEST
 
 .PHONY: all
