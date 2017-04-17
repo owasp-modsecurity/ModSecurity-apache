@@ -1,0 +1,3 @@
+
+LoadModule security3_module "@ServerRoot@/.././src/.libs/apache_http_modsecurity.so"
+
