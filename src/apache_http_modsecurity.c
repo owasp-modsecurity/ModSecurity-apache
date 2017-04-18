@@ -137,7 +137,7 @@ static void msc_register_hooks(apr_pool_t *pool)
 void *msc_hook_create_config_directory(apr_pool_t *mp, char *path)
 {
     ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-        "ModSecurity: Created directorry config for path: %s", path);
+        "ModSecurity: Created directory config for path: %s", path);
 
     return NULL;
 }
