@@ -12,8 +12,16 @@ MAINTAINERCLEANFILES = \
         modsec-shared-collections-lock
 
 CLEANFILES = \
-	t/logs \
-	t/conf
+	t/logs/* \
+	t/htdocs/index.html \
+	t/conf/extra.conf \
+	t/conf/apache_test_config.pm \
+	t/conf/httpd.conf \
+	src/*.lo \
+	src/*.slo
+
+CLEANDIRECTORIES = \
+	t/logs
 
 
 all:
