@@ -21,35 +21,46 @@
 #include <modsecurity/rules.h>
 #include <modsecurity/intervention.h>
 
-module AP_MODULE_DECLARE_DATA security3_module;
+
+#ifndef _SRC_APACHE_HTTP_MODSECURITY__
+#define _SRC_APACHE_HTTP_MODSECURITY__
+
+
+
+extern module AP_MODULE_DECLARE_DATA security3_module;
 
 extern const command_rec module_directives[];
 
-static void register_hooks(apr_pool_t *pool);
-static int modsec_handler(request_rec *r);
-void *apache_http_modsecurity_create_loc_conf(apr_pool_t *mp, char *path);
-void *apache_http_modsecurity_create_main_conf(apr_pool_t* pool, server_rec* svr);
-static void* apache_http_modsecurity_merge_loc_conf(apr_pool_t* pool, void* parent, void* child);
-const char  *apache_http_modsecurity_set_remote_server(cmd_parms *cmd, void *cfg, const char *p1,
-                                                       const char *p2);
-const char *apache_http_modsecurity_set_file_path(cmd_parms *cmd, void *cfg, const char *p);
 
-static void *FilterInCreateServerConfig(apr_pool_t *p, server_rec *s);
-static void *FilterOutCreateServerConfig(apr_pool_t *p, server_rec *s);
-static const char *FilterInEnable(cmd_parms *cmd, void *dummy, int arg);
-static const char *FilterOutEnable(cmd_parms *cmd, void *dummy, int arg);
-static int output_filter(ap_filter_t *f, apr_bucket_brigade *pbbIn);
-static int input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut, ap_input_mode_t eMode,
-                        apr_read_type_e eBlock, apr_off_t nBytes);
+int msc_apache_init(apr_pool_t *pool);
+int msc_apache_cleanup();
 
-static void InputFilter(request_rec *r);
-static void OutputFilter(request_rec *r);
+static apr_status_t msc_module_cleanup(void *data);
+
+static int msc_hook_pre_config(apr_pool_t *mp, apr_pool_t *mp_log,
+    apr_pool_t *mp_temp);
+static int msc_hook_post_config(apr_pool_t *mp, apr_pool_t *mp_log,
+    apr_pool_t *mp_temp, server_rec *s);
+static void msc_register_hooks(apr_pool_t *pool);
+
+void *msc_hook_create_config_directory(apr_pool_t *mp, char *path);
+static void *msc_hook_merge_config_directory(apr_pool_t *mp, void *parent,
+    void *child);
+
+
+typedef struct
+{
+    ModSecurity *modsec;
+} msc_t;
+
 
 typedef struct
 {
     ModSecurity *modsec;
     Transaction *transaction;
 } apache_http_modsecurity_main_conf_t;
+
+
 
 typedef struct
 {
@@ -72,3 +83,6 @@ typedef struct
 {
     apr_bucket_brigade *pbbTmp;
 } FilterContext;
+
+
+#endif /*  _SRC_APACHE_HTTP_MODSECURITY__ */

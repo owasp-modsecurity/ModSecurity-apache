@@ -12,4 +12,4 @@ for opt in "$@"; do
     esac
 done
 
-exec @APXS@ -a -c -I @V3INCLUDE@ -L @V3LIB@ -lmodsecurity src/apache_http_modsecurity.c src/config.c src/io.c
+exec @APXS@ -a -c -I @V3INCLUDE@ -L @V3LIB@ -lmodsecurity src/apache_http_modsecurity.c src/msc_config.c src/msc_filters.c
