@@ -56,6 +56,16 @@ typedef struct
 
 typedef struct
 {
+    Rules *rules_set;
+    int msc_state;
+} msc_conf_t;
+
+
+
+
+
+typedef struct
+{
     ModSecurity *modsec;
     Transaction *transaction;
 } apache_http_modsecurity_main_conf_t;

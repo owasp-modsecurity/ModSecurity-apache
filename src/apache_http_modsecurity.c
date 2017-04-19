@@ -90,7 +90,7 @@ static int msc_hook_post_config(apr_pool_t *mp, apr_pool_t *mp_log,
     apr_pool_userdata_get(&data, key, s->process->pool);
     if (data == NULL) {
         apr_pool_userdata_set((const void *) 1, key,
-                apr_pool_cleanup_null, s->process->pool);
+            apr_pool_cleanup_null, s->process->pool);
         first_time = 1;
     }
 
@@ -136,10 +136,20 @@ static void msc_register_hooks(apr_pool_t *pool)
 
 void *msc_hook_create_config_directory(apr_pool_t *mp, char *path)
 {
+    msc_conf_t *cnf = NULL;
+
     ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
         "ModSecurity: Created directory config for path: %s", path);
 
-    return NULL;
+    cnf = apr_palloc(mp, sizeof(msc_conf_t));
+    if (cnf == NULL) {
+        goto end;
+    }
+
+    cnf->rules_set = msc_create_rules_set();
+
+end:
+    return cnf;
 }
 
 
