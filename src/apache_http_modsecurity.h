@@ -5,7 +5,6 @@
 #include "http_request.h"
 #include "http_connection.h"
 #include "http_log.h"
-#include "ap_expr.h"
 #include "apr.h"
 #include "apr_hash.h"
 #include "apr_strings.h"
