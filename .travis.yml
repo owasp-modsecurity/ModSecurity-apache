@@ -55,6 +55,8 @@ before_script:
   - ls -la /usr/local/apache2/include/
   - ./configure --with-apxs=/usr/local/apache2/bin/apxs
   - make
+  - sudo make install
+  - ldd src/.libs/apache_http_modsecurity.so 
   - pwd
 
 script:
