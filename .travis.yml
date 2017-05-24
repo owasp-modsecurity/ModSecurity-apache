@@ -49,6 +49,12 @@ before_script:
   - pwd
   - cd -
   - cd ModSecurity-apache
+  - ./autogen.sh
+  - export PATH="/usr/local/apache2/bin/:$PATH"
+  - ls -la /usr/local/apache2/bin/
+  - ls -la /usr/local/apache2/include/
+  - ./configure --with-apxs=/usr/local/apache2/bin/apxs
+  - make
   - pwd
 
 script:

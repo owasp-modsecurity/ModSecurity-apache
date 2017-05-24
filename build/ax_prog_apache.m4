@@ -112,7 +112,7 @@ AC_DEFUN([AX_PROG_APACHE],
     # If not specified by caller, search in standard places
     #
     if test -z "$APACHE" ; then
-      AC_PATH_PROG(APACHE, httpd, , /usr/local/apache/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin)
+      AC_PATH_PROG(APACHE, httpd, , /usr/local/apache/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/apache2/bin)
     fi
     AC_SUBST(APACHE)
     if test -z "$APACHE" ; then
