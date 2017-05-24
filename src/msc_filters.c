@@ -113,7 +113,7 @@ static int input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
             return ret;
         }
 
-        buf = ap_malloc(len);
+        buf = (unsigned char *) malloc(len);
         for (n=0 ; n < len ; ++n)
         {
             buf[n] = data[n];
