@@ -20,6 +20,7 @@ addons:
     - apache2-dbg
     - apache2-dev
     - apache2-mpm-prefork
+    - libwww-perl
 
 env:
   - VER_APACHE=2.2.32
