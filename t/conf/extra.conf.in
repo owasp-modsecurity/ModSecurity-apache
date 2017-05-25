@@ -1,4 +1,6 @@
 
+CoreDumpDirectory /tmp/
+
 LoadModule security3_module "@ServerRoot@/.././src/.libs/apache_http_modsecurity.so"
 
 <Location "/modsec-on">
@@ -10,3 +12,8 @@ LoadModule security3_module "@ServerRoot@/.././src/.libs/apache_http_modsecurity
 	modsecurity_rules 'SecRule ARGS "teste" "id:1,log,pass"'
 </Location>
 
+
+<Location "/block-evil">
+	modsecurity On
+	modsecurity_rules 'SecRule ARGS "evil" "id:1,log,deny,status:403"'
+</Location>
