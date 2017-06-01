@@ -1,7 +1,12 @@
 
+#include <modsecurity/modsecurity.h>
+#include <modsecurity/rules.h>
+#include <modsecurity/intervention.h>
 
 #ifndef _SRC_MSC_FILTERS__
 #define _SRC_MSC_FILTERS__
+
+#include "mod_security3.h"
 
 static void *FilterInCreateServerConfig(apr_pool_t *p, server_rec *s);
 static void *FilterOutCreateServerConfig(apr_pool_t *p, server_rec *s);
