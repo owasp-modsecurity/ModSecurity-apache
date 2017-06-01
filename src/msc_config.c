@@ -1,5 +1,5 @@
 
-#include "apache_http_modsecurity.h"
+#include "mod_security3.h"
 #include "msc_config.h"
 #include "msc_filters.h"
 
@@ -113,21 +113,4 @@ static const char *msc_config_load_rules_remote(cmd_parms *cmd, void *_cnf,
     return NULL;
 }
 
-
-static const char *FilterInEnable(cmd_parms *cmd, void *dummy, int arg)
-{
-    FilterConfig *pConfig = ap_get_module_config(cmd->server->module_config, &security3_module);
-    pConfig->iEnabled=arg;
-
-    return NULL;
-}
-
-
-static const char *FilterOutEnable(cmd_parms *cmd, void *dummy, int arg)
-{
-    FilterConfig *pConfig = ap_get_module_config(cmd->server->module_config, &security3_module);
-    pConfig->oEnabled=arg;
-
-    return NULL;
-}
 

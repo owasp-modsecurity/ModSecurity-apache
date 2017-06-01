@@ -2,8 +2,6 @@
 #ifndef _SRC_MSC_CONFIG__
 #define _SRC_MSC_CONFIG__
 
-static const char *FilterInEnable(cmd_parms *cmd, void *dummy, int arg);
-static const char *FilterOutEnable(cmd_parms *cmd, void *dummy, int arg);
 const char *apache_http_modsecurity_set_remote_server(cmd_parms *cmd,
         void *cfg,
         const char *p1,
