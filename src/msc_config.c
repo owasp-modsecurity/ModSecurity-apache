@@ -72,7 +72,8 @@ static const char *msc_config_load_rules(cmd_parms *cmd, void *_cnf,
 
     ret = msc_rules_add(cnf->rules_set, p1, &error);
 
-    if (ret < 0) {
+    if (ret < 0)
+    {
         return error;
     }
 
@@ -89,7 +90,8 @@ static const char *msc_config_load_rules_file(cmd_parms *cmd, void *_cnf,
 
     ret = msc_rules_add_file(cnf->rules_set, p1, &error);
 
-    if (ret < 0) {
+    if (ret < 0)
+    {
         return error;
     }
 
@@ -106,11 +108,11 @@ static const char *msc_config_load_rules_remote(cmd_parms *cmd, void *_cnf,
 
     ret = msc_rules_add_remote(cnf->rules_set, p1, p2, &error);
 
-    if (ret < 0) {
+    if (ret < 0)
+    {
         return error;
     }
 
     return NULL;
 }
-
 

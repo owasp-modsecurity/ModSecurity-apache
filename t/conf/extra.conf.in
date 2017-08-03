@@ -1,19 +1,30 @@
 
 CoreDumpDirectory /tmp/
 
-LoadModule security3_module "@ServerRoot@/.././src/.libs/apache_http_modsecurity.so"
+LoadModule security3_module "@ServerRoot@/.././src/.libs/mod_security3.so"
+
+# Lets make sure that the engine is on.
+modsecurity_rules 'SecRuleEngine On'
+
+# Debug logs
+modsecurity_rules 'SecDebugLog @ServerRoot@/logs/debug_logs.txt'
+modsecurity_rules 'SecDebugLogLevel 9'
 
 <Location "/modsec-on">
-	modsecurity On
 </Location>
 
 <Location "/modsec-off">
-	modsecurity Off
-	modsecurity_rules 'SecRule ARGS "teste" "id:1,log,pass"'
+    modsecurity_rules 'SecRuleEngine On'
+</Location>
+
+<Location "/modsec-detectiononly">
+    modsecurity_rules 'SecRuleEngine DetectionOnly'
 </Location>
 
 
+    modsecurity_rules 'SecRule ARGS "evil" "phase:1,id:2,log,status:403,block"'
+    modsecurity_rules 'SecRule RESPONSE_HEADERS "evil" "phase:3,id:3,log,status:403,block"'
+    modsecurity_rules 'SecRule RESPONSE_BODY "evil" "phase:4,id:3,log,status:403,block"'
 <Location "/block-evil">
-	modsecurity On
-	modsecurity_rules 'SecRule ARGS "evil" "id:1,log,deny,status:403"'
 </Location>
+

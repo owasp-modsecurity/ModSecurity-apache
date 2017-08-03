@@ -33,8 +33,15 @@
 #define MSC_APACHE_CONNECTOR "ModSecurity-Apache v0.1.1-beta"
 #define REQUEST_EARLY
 
+#define N_INTERVENTION_STATUS 200
+
 extern module AP_MODULE_DECLARE_DATA security3_module;
 extern const command_rec module_directives[];
+
+int process_intervention (Transaction *t, request_rec *r);
+
+static void hook_insert_filter(request_rec *r);
+int id(const char *fn, const char *format, ...);
 
 int msc_apache_init(apr_pool_t *pool);
 int msc_apache_cleanup();
