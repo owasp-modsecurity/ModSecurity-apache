@@ -1,7 +1,9 @@
 
+
 CoreDumpDirectory /tmp/
 
 LoadModule security3_module "@ServerRoot@/.././src/.libs/mod_security3.so"
+
 
 # Lets make sure that the engine is on.
 modsecurity_rules 'SecRuleEngine On'
@@ -10,21 +12,46 @@ modsecurity_rules 'SecRuleEngine On'
 modsecurity_rules 'SecDebugLog @ServerRoot@/logs/debug_logs.txt'
 modsecurity_rules 'SecDebugLogLevel 9'
 
-<Location "/modsec-on">
+
+<Directory "@ServerRoot@/htdocs/block-evil-1">
+    modsecurity_rules 'SecRule REQUEST_URI "evil" "phase:1,id:111,log,status:403,block,deny"'
+</Directory>
+
+<Directory "@ServerRoot@/htdocs/block-evil-2">
+    modsecurity_rules 'SecRule ARGS "evil" "phase:2,id:112,log,status:403,block,deny"'
+</Directory>
+
+<Directory "@ServerRoot@/htdocs/block-evil-3">
+    modsecurity_rules 'SecRule ARGS "evil" "phase:3,id:113,log,status:403,block,deny"'
+</Directory>
+
+<Directory "@ServerRoot@/htdocs/block-evil-4">
+    modsecurity_rules 'SecRule ARGS "evil" "phase:4,id:114,log,status:403,block,deny"'
+</Directory>
+
+<Directory "@ServerRoot@/htdocs/block-evil-5">
+    modsecurity_rules 'SecRule ARGS "evil" "phase:5,id:115,log,status:403,block,deny"'
+</Directory>
+
+
+
+<Location "/block-evil-1-loc">
+    modsecurity_rules 'SecRule REQUEST_URI "evil" "phase:1,id:111,log,status:402,block,deny"'
 </Location>
 
-<Location "/modsec-off">
-    modsecurity_rules 'SecRuleEngine On'
+<Location "/block-evil-2-loc">
+    modsecurity_rules 'SecRule ARGS "evil" "phase:2,id:112,log,status:402,block,deny"'
 </Location>
 
-<Location "/modsec-detectiononly">
-    modsecurity_rules 'SecRuleEngine DetectionOnly'
+<Location "/block-evil-3-loc">
+    modsecurity_rules 'SecRule ARGS "evil" "phase:3,id:113,log,status:402,block,deny"'
 </Location>
 
+<Location "/block-evil-4-loc">
+    modsecurity_rules 'SecRule ARGS "evil" "phase:4,id:1134,log,status:402,block,deny"'
+</Location>
 
-    modsecurity_rules 'SecRule ARGS "evil" "phase:1,id:2,log,status:403,block"'
-    modsecurity_rules 'SecRule RESPONSE_HEADERS "evil" "phase:3,id:3,log,status:403,block"'
-    modsecurity_rules 'SecRule RESPONSE_BODY "evil" "phase:4,id:3,log,status:403,block"'
-<Location "/block-evil">
+<Location "/block-evil-5-loc">
+    modsecurity_rules 'SecRule ARGS "evil" "phase:5,id:114,log,status:402,block,deny"'
 </Location>
 
