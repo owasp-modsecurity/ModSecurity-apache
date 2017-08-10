@@ -4,3 +4,4 @@
 *.lai
 .libs/*
 src/.libs/*
+t/htdocs/index.html
