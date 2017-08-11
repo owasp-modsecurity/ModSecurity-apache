@@ -3,6 +3,7 @@
 #include "msc_config.h"
 #include "msc_filters.h"
 
+
 const command_rec module_directives[] =
 {
     AP_INIT_TAKE1(
@@ -116,3 +117,91 @@ static const char *msc_config_load_rules_remote(cmd_parms *cmd, void *_cnf,
     return NULL;
 }
 
+void *msc_hook_create_config_directory(apr_pool_t *mp, char *path)
+{
+    msc_conf_t *cnf = NULL;
+
+    cnf = apr_pcalloc(mp, sizeof(msc_conf_t));
+    if (cnf == NULL)
+    {
+        goto end;
+    }
+#if 0
+    ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
+        "ModSecurity: Created directory config for path: %s [%pp]", path, cnf);
+#endif
+
+    cnf->rules_set = msc_create_rules_set();
+    if (path != NULL)
+    {
+        cnf->name_for_debug = strdup(path);
+    }
+#if 0
+    ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
+        "ModSecurity: Config for path: %s is at: %pp", path, cnf);
+#endif
+
+end:
+    return cnf;
+}
+
+
+void *msc_hook_merge_config_directory(apr_pool_t *mp, void *parent,
+    void *child)
+{
+    msc_conf_t *cnf_p = parent;
+    msc_conf_t *cnf_c = child;
+    msc_conf_t *cnf_new = (msc_conf_t *)msc_hook_create_config_directory(mp, cnf_c->name_for_debug);
+
+    if (cnf_p && cnf_c)
+    {
+        const char *error = NULL;
+        int ret;
+#if 0
+        ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
+            "ModSecurity: Merge parent %pp [%s] child %pp [%s]" \
+            "into: %pp", cnf_p,
+            cnf_p->name_for_debug,
+            child, cnf_c->name_for_debug, cnf_new);
+#endif
+        cnf_new->name_for_debug = cnf_c->name_for_debug;
+
+        ret = msc_rules_merge(cnf_new->rules_set, cnf_c->rules_set, &error);
+        if (ret < 0)
+        {
+            ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
+                "ModSecurity: Rule merge failed: %s", error);
+            return NULL;
+        }
+
+        ret = msc_rules_merge(cnf_new->rules_set, cnf_p->rules_set, &error);
+        if (ret < 0)
+        {
+            ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
+                "ModSecurity: Rule merge failed: %s", error);
+            return NULL;
+        }
+#if 0
+        ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
+                "ModSecurity: Merge OK");
+#endif
+    }
+    else if (cnf_c && !cnf_p)
+    {
+#if 0
+        ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
+            "ModSecurity: Merge parent -NULL- [-NULL-] child %pp [%s]",
+            cnf_c, cnf_c->name_for_debug);
+#endif
+    }
+    else if (cnf_p && !cnf_c)
+    {
+#if 0
+        ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
+            "ModSecurity: Merge parent %pp [%s] child -NULL- [-NULL-]",
+            cnf_p, cnf_p->name_for_debug);
+#endif
+    }
+
+    return cnf_new;
+}

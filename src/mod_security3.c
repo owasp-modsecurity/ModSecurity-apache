@@ -1,11 +1,15 @@
 
 #include "mod_security3.h"
 #include "msc_utils.h"
+#include "msc_config.h"
+#include "msc_tx_context.h"
+#include "msc_hooks.h"
 
 /*
  *
  */
-msc_t *msc_apache;
+msc_global *msc_apache;
+
 
 
 int process_intervention (Transaction *t, request_rec *r)
@@ -44,6 +48,83 @@ int process_intervention (Transaction *t, request_rec *r)
     }
 
     return N_INTERVENTION_STATUS;
+}
+
+
+/*
+ * Called only once. Used to initialise the ModSecurity
+ *
+ */
+int msc_apache_init(apr_pool_t *mp)
+{
+    msc_apache = apr_pcalloc(mp, sizeof(msc_global));
+    if (msc_apache == NULL)
+    {
+        goto err_no_mem;
+    }
+
+    msc_apache->modsec = msc_init();
+
+    msc_set_connector_info(msc_apache->modsec, MSC_APACHE_CONNECTOR);
+
+    apr_pool_cleanup_register(mp, NULL, msc_module_cleanup, apr_pool_cleanup_null);
+
+    return 0;
+
+err_no_mem:
+    return -1;
+}
+
+
+/*
+ * Called only once. Used to cleanup ModSecurity
+ *
+ */
+int msc_apache_cleanup()
+{
+    msc_cleanup(msc_apache->modsec);
+}
+
+
+/*
+ * Used to cleanup the module
+ *
+ */
+static apr_status_t msc_module_cleanup(void *data)
+{
+    msc_apache_cleanup();
+    return APR_SUCCESS;
+}
+
+
+
+/**
+ * Stores transaction context where it can be found in subsequent
+ * phases, redirections, or subrequests.
+ */
+static void store_tx_context(msc_t *msr, request_rec *r)
+{
+    apr_table_setn(r->notes, NOTE_MSR, (void *)msr);
+}
+
+
+static msc_t *create_tx_context(request_rec *r) {
+    msc_t *msr = NULL;
+    msc_conf_t *z = NULL;
+    z = (msc_conf_t *)ap_get_module_config(r->per_dir_config,
+            &security3_module);
+
+    msr = (msc_t *)apr_pcalloc(r->pool, sizeof(msc_t));
+    if (msr == NULL) {
+        return NULL;
+    }
+
+    msr->r = r;
+    msr->t = msc_new_transaction(msc_apache->modsec, (Rules *)z->rules_set, NULL);
+
+    store_tx_context(msr, r);
+
+    return msr;
 }
 
 
@@ -88,240 +169,6 @@ static msc_t *retrieve_tx_context(request_rec *r) {
     }
 
     return NULL;
-}
-
-
-/**
- * Stores transaction context where it can be found in subsequent
- * phases, redirections, or subrequests.
- */
-static void store_tx_context(msc_t *msr, request_rec *r)
-{
-    apr_table_setn(r->notes, NOTE_MSR, (void *)msr);
-}
-
-
-static int hook_connection_early(conn_rec *conn)
-{
-    // At this point there isn't a request_rec attached to the request,
-    // therefore we can't create the config yet, lets wait till next phase.
-
-    return DECLINED;
-}
-
-
-static int process_request_headers(request_rec *r, msc_t *msr) {
-    /* process uri */
-    {
-        int it;
-        msc_process_uri(msr->t, r->unparsed_uri, r->method, r->protocol);
-
-        it = process_intervention(msr->t, r);
-        if (it != N_INTERVENTION_STATUS)
-        {
-            return it;
-        }
-    }
-
-    /* add request headers */
-    {
-        const apr_array_header_t *arr = NULL;
-        const apr_table_entry_t *te = NULL;
-        int i;
-        int it;
-
-        arr = apr_table_elts(r->headers_in);
-        te = (apr_table_entry_t *)arr->elts;
-        for (i = 0; i < arr->nelts; i++)
-        {
-            const char *key = te[i].key;
-            const char *val = te[i].val;
-            msc_add_request_header(msr->t, key, val);
-        }
-        msc_process_request_headers(msr->t);
-
-        it = process_intervention(msr->t, r);
-        if (it != N_INTERVENTION_STATUS)
-        {
-            return it;
-        }
-    }
-
-    return N_INTERVENTION_STATUS;
-}
-
-
-/**
- * Initial request processing, executed immediatelly after
- * Apache receives the request headers. This function wil create
- * a transaction context.
- */
-static int hook_request_early(request_rec *r) {
-    msc_t *msr = NULL;
-    int rc = DECLINED;
-    int it = 0;
-    FILE *debug = NULL;
-
-    msc_conf_t *cnf = ap_get_module_config(r->per_dir_config,
-                            &security3_module);
-
-    /* This function needs to run only once per transaction
-     * (i.e. subrequests and redirects are excluded).
-     */
-    if ((r->main != NULL) || (r->prev != NULL) || cnf == NULL)
-    {
-        return DECLINED;
-    }
-
-    /* Initialise transaction context and
-     * create the initial configuration.
-     */
-    msr = apr_palloc(r->pool, sizeof(msc_t));
-    msr->t = msc_new_transaction(msc_apache->modsec, cnf->rules_set, NULL);
-    if (msr == NULL)
-    {
-        return DECLINED;
-    }
-    store_tx_context(msr, r);
-
-    msc_process_connection(msr->t, r->connection->client_ip,
-        r->connection->client_addr->port,
-        r->server->server_hostname,
-        (int) r->server->port);
-
-    it = process_intervention(msr->t, r);
-    if (it != N_INTERVENTION_STATUS)
-    {
-        return it;
-    }
-
-#ifdef REQUEST_EARLY
-    it = process_request_headers(r, msr);
-    if (it != N_INTERVENTION_STATUS)
-    {
-        return it;
-    }
-#endif
-
-    return rc;
-}
-
-/**
- * Invoked as the first hook in the handler chain, this function
- * executes the second phase of ModSecurity request processing.
- */
-static int hook_request_late(request_rec *r)
-{
-    msc_t *msr = NULL;
-    int it;
-
-    /* This function needs to run only once per transaction
-     * (i.e. subrequests and redirects are excluded).
-     */
-    if ((r->main != NULL) || (r->prev != NULL))
-    {
-        return DECLINED;
-    }
-
-    /* Find the transaction context and make sure
-     * we are supposed to proceed.
-     */
-    msr = retrieve_tx_context(r);
-    if (msr == NULL)
-    {
-        /* If we can't find the context that probably means it's
-         * a subrequest that was not initiated from the outside.
-         */
-        return DECLINED;
-    }
-
-#ifndef REQUEST_EARLY
-    it = process_request_headers(r, msr);
-    if (it != N_INTERVENTION_STATUS)
-    {
-        return it;
-    }
-#endif
-
-    msc_process_request_body(msr->t);
-    it = process_intervention(msr->t, r);
-    if (it != N_INTERVENTION_STATUS)
-    {
-        return it;
-    }
-
-    return DECLINED;
-}
-
-
-/**
- * Invoked at the end of each transaction.
- */
-static int hook_log_transaction(request_rec *r)
-{
-    const apr_array_header_t *arr = NULL;
-    request_rec *origr = NULL;
-    msc_t *msr = NULL;
-    int it;
-
-    msr = retrieve_tx_context(r);
-    if (msr == NULL)
-    {
-        return DECLINED;
-    }
-
-    msc_process_logging(msr->t);
-    it = process_intervention(msr->t, r);
-    if (it != N_INTERVENTION_STATUS)
-    {
-        return it;
-    }
-}
-
-
-/*
- * Called only once. Used to initialise the ModSecurity
- *
- */
-int msc_apache_init(apr_pool_t *mp)
-{
-    msc_apache = apr_palloc(mp, sizeof(msc_t));
-    if (msc_apache == NULL)
-    {
-        goto err_no_mem;
-    }
-
-    msc_apache->modsec = msc_init();
-
-    msc_set_connector_info(msc_apache->modsec, MSC_APACHE_CONNECTOR);
-
-    apr_pool_cleanup_register(mp, NULL, msc_module_cleanup, apr_pool_cleanup_null);
-
-    return 0;
-
-err_no_mem:
-    return -1;
-}
-
-
-/*
- * Called only once. Used to cleanup ModSecurity
- *
- */
-int msc_apache_cleanup()
-{
-    msc_cleanup(msc_apache->modsec);
-}
-
-
-/*
- * Used to cleanup the module
- *
- */
-static apr_status_t msc_module_cleanup(void *data)
-{
-    msc_apache_cleanup();
-    return APR_SUCCESS;
 }
 
 
@@ -389,6 +236,236 @@ static int msc_hook_post_config(apr_pool_t *mp, apr_pool_t *mp_log,
 }
 
 
+
+static int hook_connection_early(conn_rec *conn)
+{
+    // At this point there isn't a request_rec attached to the request,
+    // therefore we can't create the config yet, lets wait till next phase.
+
+    return DECLINED;
+}
+
+
+/**
+ * Initial request processing, executed immediatelly after
+ * Apache receives the request headers. This function wil create
+ * a transaction context.
+ */
+static int hook_request_early(request_rec *r) {
+    msc_t *msr = NULL;
+    int rc = DECLINED;
+
+    /* This function needs to run only once per transaction
+     * (i.e. subrequests and redirects are excluded).
+     */
+    if ((r->main != NULL) || (r->prev != NULL)) {
+        return DECLINED;
+    }
+
+    /* Initialise transaction context and
+     * create the initial configuration.
+     */
+#ifdef REQUEST_EARLY
+#error "Request Early is not ready for v3 yet."
+    msr = create_tx_context(r);
+    if (msr == NULL)
+    {
+        return DECLINED;
+    }
+#endif
+
+#ifndef LATE_CONNECTION_PROCESS
+#error "Currently in v3 connection can only be processed late."
+    msc_process_connection(msr->t, r->connection->client_ip,
+        r->connection->client_addr->port,
+        r->server->server_hostname,
+        (int) r->server->port);
+
+    it = process_intervention(msr->t, r);
+    if (it != N_INTERVENTION_STATUS)
+    {
+        return it;
+    }
+#endif
+
+#ifdef REQUEST_EARLY
+    it = process_request_headers(r, msr);
+    if (it != N_INTERVENTION_STATUS)
+    {
+        return it;
+    }
+#endif
+
+    return rc;
+}
+
+/**
+ * Invoked as the first hook in the handler chain, this function
+ * executes the second phase of ModSecurity request processing.
+ */
+static int hook_request_late(request_rec *r)
+{
+    msc_t *msr = NULL;
+    int it;
+
+    /* This function needs to run only once per transaction
+     * (i.e. subrequests and redirects are excluded).
+     */
+    if ((r->main != NULL) || (r->prev != NULL))
+    {
+        return DECLINED;
+    }
+
+    /* Find the transaction context and make sure
+     * we are supposed to proceed.
+     */
+#ifdef REQUEST_EARLY
+    msr = retrieve_tx_context(r);
+#else
+    msr = create_tx_context(r);
+#endif
+    if (msr == NULL)
+    {
+        /* If we can't find the context that probably means it's
+         * a subrequest that was not initiated from the outside.
+         */
+        return DECLINED;
+    }
+
+#ifdef LATE_CONNECTION_PROCESS
+    msc_process_connection(msr->t, r->connection->client_ip,
+        r->connection->client_addr->port,
+        r->server->server_hostname,
+        (int) r->server->port);
+
+    it = process_intervention(msr->t, r);
+    if (it != N_INTERVENTION_STATUS)
+    {
+        return it;
+    }
+#endif
+
+#ifndef REQUEST_EARLY
+    it = process_request_headers(r, msr);
+    if (it != N_INTERVENTION_STATUS)
+    {
+        return it;
+    }
+#endif
+    msc_process_request_body(msr->t);
+    it = process_intervention(msr->t, r);
+    if (it != N_INTERVENTION_STATUS)
+    {
+        return it;
+    }
+
+    return DECLINED;
+}
+
+
+/**
+ * Invoked at the end of each transaction.
+ */
+static int hook_log_transaction(request_rec *r)
+{
+    const apr_array_header_t *arr = NULL;
+    request_rec *origr = NULL;
+    msc_t *msr = NULL;
+    int it;
+
+    msr = retrieve_tx_context(r);
+    if (msr == NULL)
+    {
+        return DECLINED;
+    }
+
+    msc_process_logging(msr->t);
+    it = process_intervention(msr->t, r);
+    if (it != N_INTERVENTION_STATUS)
+    {
+        return it;
+    }
+
+    return DECLINED;
+}
+
+
+/**
+ * Invoked right before request processing begins. This is
+ * when we need to decide if we want to hook into the output
+ * filter chain.
+ */
+static void hook_insert_filter(request_rec *r)
+{
+    msc_t *msr = NULL;
+
+    /* Find the transaction context first. */
+    msr = retrieve_tx_context(r);
+    if (msr == NULL)
+    {
+        return;
+    }
+
+#if 1
+    /* Add the input filter, but only if we need it to run. */
+    ap_add_input_filter("MODSECURITY_IN", msr, r, r->connection);
+#endif
+
+    /* The output filters only need to be added only once per transaction
+     * (i.e. subrequests and redirects are excluded).
+     */
+    if ((r->main != NULL) || (r->prev != NULL))
+    {
+        return;
+    }
+
+
+    ap_add_output_filter("MODSECURITY_OUT", msr, r, r->connection);
+}
+
+
+static int process_request_headers(request_rec *r, msc_t *msr) {
+    /* process uri */
+    {
+        int it;
+        msc_process_uri(msr->t, r->unparsed_uri, r->method, r->protocol);
+
+        it = process_intervention(msr->t, r);
+        if (it != N_INTERVENTION_STATUS)
+        {
+            return it;
+        }
+    }
+
+    /* add request headers */
+    {
+        const apr_array_header_t *arr = NULL;
+        const apr_table_entry_t *te = NULL;
+        int i;
+        int it;
+
+        arr = apr_table_elts(r->headers_in);
+        te = (apr_table_entry_t *)arr->elts;
+        for (i = 0; i < arr->nelts; i++)
+        {
+            const char *key = te[i].key;
+            const char *val = te[i].val;
+            msc_add_request_header(msr->t, key, val);
+        }
+        msc_process_request_headers(msr->t);
+
+        it = process_intervention(msr->t, r);
+        if (it != N_INTERVENTION_STATUS)
+        {
+            return it;
+        }
+    }
+
+    return N_INTERVENTION_STATUS;
+}
+
+
+
 static void msc_register_hooks(apr_pool_t *pool)
 {
     static const char *const postconfig_beforeme_list[] = {
@@ -431,20 +508,22 @@ static void msc_register_hooks(apr_pool_t *pool)
         NULL
     };
 
+    /* Module initialization */
     ap_hook_pre_config(msc_hook_pre_config, NULL, NULL, APR_HOOK_FIRST);
     ap_hook_post_config(msc_hook_post_config, postconfig_beforeme_list,
         postconfig_afterme_list, APR_HOOK_REALLY_LAST);
 
-    /* Connection processing hooks */
-    ap_hook_process_connection(hook_connection_early, NULL, NULL, APR_HOOK_FIRST);
 
-    /* Transaction processing hooks */
+    /* Connection processing hooks - only global configuration. */
     ap_hook_post_read_request(hook_request_early,
         postread_beforeme_list, postread_afterme_list, APR_HOOK_REALLY_FIRST);
 
+    /* still, we don't have location configuration yet. */
+    ap_hook_process_connection(hook_connection_early, NULL, NULL, APR_HOOK_FIRST);
+
     ap_hook_fixups(hook_request_late, fixups_beforeme_list, NULL, APR_HOOK_REALLY_FIRST);
 
-
+    /* Lets add the remaining hooks */
     ap_hook_insert_filter(hook_insert_filter, NULL, NULL, APR_HOOK_FIRST);
 
     /* Logging */
@@ -454,130 +533,17 @@ static void msc_register_hooks(apr_pool_t *pool)
      * ap_hook_error_log(hook_error_log, NULL, NULL, APR_HOOK_MIDDLE);
      *
      */
-
     ap_hook_log_transaction(hook_log_transaction, NULL, transaction_afterme_list, APR_HOOK_MIDDLE);
 
+    /* request body */
     ap_register_input_filter("MODSECURITY_IN", input_filter,
         NULL, AP_FTYPE_CONTENT_SET);
 
+    /* response body */
     ap_register_output_filter("MODSECURITY_OUT", output_filter,
         NULL, AP_FTYPE_CONTENT_SET - 3);
-
 }
 
-
-/**
- * Invoked right before request processing begins. This is
- * when we need to decide if we want to hook into the output
- * filter chain.
- */
-static void hook_insert_filter(request_rec *r)
-{
-    msc_t *msr = NULL;
-
-    /* Find the transaction context first. */
-    msr = retrieve_tx_context(r);
-    if (msr == NULL)
-    {
-        return;
-    }
-
-#if 1
-    /* Add the input filter, but only if we need it to run. */
-    ap_add_input_filter("MODSECURITY_IN", msr, r, r->connection);
-#endif
-
-    /* The output filters only need to be added only once per transaction
-     * (i.e. subrequests and redirects are excluded).
-     */
-    if ((r->main != NULL) || (r->prev != NULL))
-    {
-        return;
-    }
-
-
-    ap_add_output_filter("MODSECURITY_OUT", msr, r, r->connection);
-}
-
-
-void *msc_hook_create_config_directory(apr_pool_t *mp, char *path)
-{
-    msc_conf_t *cnf = NULL;
-
-    ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-        "ModSecurity: Created directory config for path: %s", path);
-
-    cnf = apr_palloc(mp, sizeof(msc_conf_t));
-    memset(cnf, '\0', sizeof(msc_conf_t));
-    if (cnf == NULL)
-    {
-        goto end;
-    }
-
-    cnf->rules_set = msc_create_rules_set();
-    if (path != NULL)
-    {
-        cnf->name_for_debug = strdup(path);
-    }
-
-    ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-        "ModSecurity: Config for path: %s is at: %pp", path, cnf);
-
-end:
-    return cnf;
-}
-
-
-static void *msc_hook_merge_config_directory(apr_pool_t *mp, void *parent,
-    void *child)
-{
-    msc_conf_t *cnf_p = parent;
-    msc_conf_t *cnf_c = child;
-    msc_conf_t *cnf_new = msc_hook_create_config_directory(mp, cnf_c->name_for_debug);
-
-    if (cnf_p && cnf_c)
-    {
-        const char *error = NULL;
-        int ret;
-        ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-            "ModSecurity: Merge parent %pp [%s] child %pp [%s]", cnf_p,
-            cnf_p->name_for_debug,
-            child, cnf_c->name_for_debug);
-
-        ret = msc_rules_merge(cnf_new->rules_set, cnf_c->rules_set, &error);
-        if (ret < 0)
-        {
-            ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-                "ModSecurity: Merge failed - > %s", error);
-            return NULL;
-        }
-
-        ret = msc_rules_merge(cnf_new->rules_set, cnf_p->rules_set, &error);
-        if (ret < 0)
-        {
-            ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-                "ModSecurity: Merge failed - > %s", error);
-            return NULL;
-        }
-
-        ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-                "ModSecurity: Merge OK");
-    }
-    if (cnf_c && !cnf_p)
-    {
-        ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-            "ModSecurity: Merge parent -NULL- [-NULL-] child %pp [%s]",
-            cnf_c, cnf_c->name_for_debug);
-    }
-    else if (cnf_p && !cnf_c)
-    {
-        ap_log_perror(APLOG_MARK, APLOG_STARTUP|APLOG_NOERRNO, 0, mp,
-            "ModSecurity: Merge parent %pp [%s] child -NULL- [-NULL-]",
-            cnf_p, cnf_p->name_for_debug);
-    }
-
-    return cnf_new;
-}
 
 
 module AP_MODULE_DECLARE_DATA security3_module =
@@ -591,4 +557,3 @@ module AP_MODULE_DECLARE_DATA security3_module =
     module_directives,
     msc_register_hooks
 };
-

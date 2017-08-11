@@ -31,37 +31,14 @@
 
 #define NOTE_MSR "modsecurity3-tx-context"
 #define MSC_APACHE_CONNECTOR "ModSecurity-Apache v0.1.1-beta"
-#define REQUEST_EARLY
+/* #define REQUEST_EARLY */
+#define LATE_CONNECTION_PROCESS
 
 #define N_INTERVENTION_STATUS 200
 
-extern module AP_MODULE_DECLARE_DATA security3_module;
-extern const command_rec module_directives[];
-
-int process_intervention (Transaction *t, request_rec *r);
-
-static void hook_insert_filter(request_rec *r);
-int id(const char *fn, const char *format, ...);
-
-int msc_apache_init(apr_pool_t *pool);
-int msc_apache_cleanup();
-static apr_status_t msc_module_cleanup(void *data);
-
-static int msc_hook_pre_config(apr_pool_t *mp, apr_pool_t *mp_log,
-    apr_pool_t *mp_temp);
-static int msc_hook_post_config(apr_pool_t *mp, apr_pool_t *mp_log,
-    apr_pool_t *mp_temp, server_rec *s);
-static void msc_register_hooks(apr_pool_t *pool);
-
-void *msc_hook_create_config_directory(apr_pool_t *mp, char *path);
-static void *msc_hook_merge_config_directory(apr_pool_t *mp, void *parent,
-    void *child);
-
-static int hook_request_early(request_rec *r);
 
 typedef struct
 {
-    ModSecurity *modsec;
     request_rec *r;
     Transaction *t;
 } msc_t;
@@ -74,8 +51,41 @@ typedef struct
     char *name_for_debug;
 } msc_conf_t;
 
+typedef struct
+{
+    ModSecurity *modsec;
+} msc_global;
 
-extern msc_t *msc_apache;
+extern module AP_MODULE_DECLARE_DATA security3_module;
+extern msc_global *msc_apache;
+extern const command_rec module_directives[];
 
+
+int process_intervention (Transaction *t, request_rec *r);
+
+int msc_apache_init(apr_pool_t *pool);
+int msc_apache_cleanup();
+static apr_status_t msc_module_cleanup(void *data);
+
+
+/*
+
+static int hook_connection_early(conn_rec *conn);
+
+static int msc_hook_pre_config(apr_pool_t *mp, apr_pool_t *mp_log,
+    apr_pool_t *mp_temp);
+static int msc_hook_post_config(apr_pool_t *mp, apr_pool_t *mp_log,
+    apr_pool_t *mp_temp, server_rec *s);
+
+static int hook_request_late(request_rec *r);
+static int hook_request_early(request_rec *r);
+static int hook_log_transaction(request_rec *r);
+
+static void hook_insert_filter(request_rec *r);
+*/
+/*
+*/
+
+static int process_request_headers(request_rec *r, msc_t *msr);
 
 #endif /*  _SRC_APACHE_HTTP_MODSECURITY__ */
