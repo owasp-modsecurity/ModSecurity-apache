@@ -9,6 +9,27 @@
 msc_global *msc_apache;
 
 
+void modsecurity_log_cb(void *log, const void* data)
+{
+    const char *msg;
+    if (log == NULL || data == NULL) {
+        return;
+    }
+    msg = (const char *) data;
+    request_rec *r = (request_rec *) log;
+
+#if AP_SERVER_MAJORVERSION_NUMBER > 1 && AP_SERVER_MINORVERSION_NUMBER > 2
+    ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r,
+        msg,
+        r->status);
+
+#else
+    ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r->server,
+        msg,
+        r->status);
+#endif
+
+}
 
 int process_intervention (Transaction *t, request_rec *r)
 {
@@ -67,6 +88,8 @@ int msc_apache_init(apr_pool_t *mp)
 
     apr_pool_cleanup_register(mp, NULL, msc_module_cleanup, apr_pool_cleanup_null);
 
+    msc_set_log_cb(msc_apache->modsec, modsecurity_log_cb);
+
     return 0;
 
 err_no_mem:
@@ -118,7 +141,7 @@ static msc_t *create_tx_context(request_rec *r) {
     }
 
     msr->r = r;
-    msr->t = msc_new_transaction(msc_apache->modsec, (Rules *)z->rules_set, NULL);
+    msr->t = msc_new_transaction(msc_apache->modsec, (Rules *)z->rules_set, (void *)r);
 
     store_tx_context(msr, r);
 
