@@ -252,6 +252,13 @@ static int hook_connection_early(conn_rec *conn)
 static int hook_request_early(request_rec *r) {
     msc_t *msr = NULL;
     int rc = DECLINED;
+#if AP_SERVER_MAJORVERSION_NUMBER > 1 && AP_SERVER_MINORVERSION_NUMBER < 3
+    const char *client_ip = r->connection->remote_ip;
+    int client_port = r->connection->remote_addr->port;
+#else
+    const char *client_ip = r->connection->client_ip;
+    int client_port = r->connection->client_addr->port;
+#endif
 
     /* This function needs to run only once per transaction
      * (i.e. subrequests and redirects are excluded).
@@ -274,8 +281,8 @@ static int hook_request_early(request_rec *r) {
 
 #ifndef LATE_CONNECTION_PROCESS
 #error "Currently in v3 connection can only be processed late."
-    msc_process_connection(msr->t, r->connection->client_ip,
-        r->connection->client_addr->port,
+    msc_process_connection(msr->t, client_ip,
+        client_port,
         r->server->server_hostname,
         (int) r->server->port);
 
@@ -305,6 +312,13 @@ static int hook_request_late(request_rec *r)
 {
     msc_t *msr = NULL;
     int it;
+#if AP_SERVER_MAJORVERSION_NUMBER > 1 && AP_SERVER_MINORVERSION_NUMBER < 3
+    const char *client_ip = r->connection->remote_ip;
+    int client_port = r->connection->remote_addr->port;
+#else
+    const char *client_ip = r->connection->client_ip;
+    int client_port = r->connection->client_addr->port;
+#endif
 
     /* This function needs to run only once per transaction
      * (i.e. subrequests and redirects are excluded).
@@ -331,8 +345,8 @@ static int hook_request_late(request_rec *r)
     }
 
 #ifdef LATE_CONNECTION_PROCESS
-    msc_process_connection(msr->t, r->connection->client_ip,
-        r->connection->client_addr->port,
+    msc_process_connection(msr->t, client_ip,
+        client_port,
         r->server->server_hostname,
         (int) r->server->port);
 
