@@ -23,8 +23,8 @@ addons:
     - libwww-perl
 
 env:
-  - VER_APACHE=2.2.32
-  - VER_APACHE=2.4.25
+  - VER_APACHE=2.2.34
+  - VER_APACHE=2.4.27
 
 before_script:
   - curl -L https://cpanmin.us | sudo perl - --sudo App::cpanminus
