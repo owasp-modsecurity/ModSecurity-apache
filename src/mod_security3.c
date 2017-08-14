@@ -2,8 +2,6 @@
 #include "mod_security3.h"
 #include "msc_utils.h"
 #include "msc_config.h"
-#include "msc_tx_context.h"
-#include "msc_hooks.h"
 
 /*
  *
