@@ -414,6 +414,7 @@ static int hook_log_transaction(request_rec *r)
         return DECLINED;
     }
 
+    msc_update_status_code(msr->t, r->status);
     msc_process_logging(msr->t);
     it = process_intervention(msr->t, r);
     if (it != N_INTERVENTION_STATUS)

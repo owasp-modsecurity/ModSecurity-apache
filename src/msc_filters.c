@@ -108,7 +108,7 @@ apr_status_t output_filter(ap_filter_t *f, apr_bucket_brigade *bb_in)
             msc_add_response_header(msr->t, key, val);
         }
 
-        msc_process_response_headers(msr->t, 200, "HTTP 1.1");
+        msc_process_response_headers(msr->t, r->status, "HTTP 1.1");
 
         it = process_intervention(msr->t, r);
         if (it != N_INTERVENTION_STATUS)
