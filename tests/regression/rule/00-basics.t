@@ -75,12 +75,12 @@
 		SecDebugLogLevel 5
         SecDefaultAction "phase:2,log,noauditlog,pass,tag:foo"
         SecRule ARGS:test "value" "chain,phase:2,deny,status:403,id:500034"
-        SecRule &ARGS "\@eq 1" "chain,setenv:tx.foo=bar"
+        SecRule &ARGS "\@eq 1" "chain,"
         SecRule REQUEST_METHOD "\@streq GET"
 	),
 	match_log => {
 		error => [ qr/ModSecurity: /, 1 ],
-		debug => [ qr/Rule [0-9a-f]+: SecRule "ARGS:test" "\@rx value" "phase:2,log,noauditlog,tag:foo,chain,deny,status:403,id:500034"\r?\n.*Rule [0-9a-f]+: SecRule "&ARGS" "\@eq 1" "chain,setenv:tx.foo=bar"\r?\n.*Rule [0-9a-f]+: SecRule "REQUEST_METHOD" "\@streq GET"\r?\n/s, 1 ],
+		debug => [ qr/Rule [0-9a-f]+: SecRule "ARGS:test" "\@rx value" "phase:2,log,noauditlog,tag:foo,chain,deny,status:403,id:500034"\r?\n.*Rule [0-9a-f]+:/ ]
 	},
 	match_response => {
 		status => qr/^403$/,

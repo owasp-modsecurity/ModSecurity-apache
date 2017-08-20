@@ -59,8 +59,7 @@
 		SecRuleEngine On
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 1
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500242"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500242"
 	),
 	match_log => {
 		debug => [ qr/\]\[[1]\] /, 1 ],
@@ -84,8 +83,7 @@
 		SecRuleEngine DetectionOnly
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 2
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500243"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500243"
 	),
 	match_log => {
 		debug => [ qr/\]\[2\] /, 1 ],
@@ -109,8 +107,7 @@
 		SecRuleEngine On
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 3
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500244"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500244"
 	),
 	match_log => {
 		debug => [ qr/\]\[3\] /, 1 ],
@@ -134,8 +131,7 @@
 		SecRuleEngine On
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 4
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500245"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500245"
 	),
 	match_log => {
 		debug => [ qr/\]\[4\] /, 1 ],
@@ -159,8 +155,7 @@
 		SecRuleEngine On
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 5
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500246"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500246"
 	),
 	match_log => {
 		debug => [ qr/\]\[5\] /, 1 ],
@@ -184,8 +179,7 @@
 		SecRuleEngine On
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 6
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500247"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500247"
 	),
 	match_log => {
 		debug => [ qr/\]\[6\] /, 1 ],
@@ -209,8 +203,7 @@
 		SecRuleEngine On
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 7
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500248"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500248"
 	),
 	match_log => {
 		debug => [ qr/\]\[7\] /, 1 ],
@@ -234,8 +227,7 @@
 		SecRuleEngine On
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 8
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500249"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500249"
 	),
 	match_log => {
 		debug => [ qr/\]\[8\] /, 1 ],
@@ -259,8 +251,7 @@
 		SecRuleEngine On
 		SecDebugLog $ENV{DEBUG_LOG}
 		SecDebugLogLevel 9
-		SecRuleScript "test.lua" "phase:1"
-		SecRule REQUEST_URI "(.)" "phase:4,deny,deprecatevar:bogus,id:500250"
+		SecRule REQUEST_URI "(.)" "phase:4,deny,id:500250"
 	),
 	match_log => {
 		debug => [ qr/\]\[9\] /, 1 ],
