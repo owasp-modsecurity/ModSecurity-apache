@@ -3,6 +3,7 @@
 	comment => "module loaded",
 	match_log => {
 		error => {
+			apache_v3 => [ qr/ModSecurity-Apache/, 10 ],
 			apache => [ qr/ModSecurity for Apache.* configured\./, 10 ],
 			nginx => [ qr/ModSecurity for nginx.* configured\./, 10 ],
 		},
@@ -22,6 +23,7 @@
 	},
 	match_log => {
 		error => {
+			apache_v3 => [ qr/ModSecurity-Apache/, 10 ],
 			apache => [ qr/ModSecurity for Apache.* configured\./, 10 ],
 			nginx => [ qr/ModSecurity for nginx.* configured\./, 10 ],
 		},

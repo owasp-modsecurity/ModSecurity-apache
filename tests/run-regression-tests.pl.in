@@ -51,7 +51,8 @@ if ($HTTPD eq "\@APXS_HTTPD\@") {
 
 $SIG{TERM} = $SIG{INT} = \&handle_interrupt;
 
-my $platform = "apache";
+my $platform = "apache_v3";
+my $platform_alternative = "apache";
 
 my %opt;
 getopts('A:E:D:C:T:H:a:p:dvh', \%opt);
@@ -235,6 +236,9 @@ sub runfile {
                         if (ref($m) eq "HASH") {
                             if ($m->{$platform}) {
                                 $m = $m->{$platform};
+                            }
+                            elsif ($m->{$platform_alternative}) {
+                                $m = $m->{$platform_alternative};
                             }
                             else {
                                 my $ap = join(", ", keys %{$m});
