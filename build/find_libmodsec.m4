@@ -18,10 +18,14 @@ if test -z "$V3PATH"; then
            /usr/local/sbin \
            /usr/local/bin \
            /usr/sbin \
-           /usr/bin;
+           /usr/bin \
+           /usr;
   do
     if test -f "$i/lib/libmodsecurity.so"; then
       V3LIB="$i/lib/"
+    fi
+    if test -f "$i/lib64/libmodsecurity.so"; then
+      V3LIB="$i/lib64/"
     fi
     if test -f "$i/include/modsecurity/modsecurity.h"; then
       V3INCLUDE="$i/include/"
