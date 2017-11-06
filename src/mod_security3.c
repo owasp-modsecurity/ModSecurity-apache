@@ -387,6 +387,8 @@ static int hook_request_late(request_rec *r)
         return it;
     }
 #endif
+
+
     msc_process_request_body(msr->t);
     it = process_intervention(msr->t, r);
     if (it != N_INTERVENTION_STATUS)
@@ -464,8 +466,11 @@ static int process_request_headers(request_rec *r, msc_t *msr) {
     /* process uri */
     {
         int it;
-        msc_process_uri(msr->t, r->unparsed_uri, r->method, r->protocol);
+	const char *proto = strdup(r->protocol);
+	if (r->protocol && (r->protocol[0] == 'H'))
+          proto = proto +5;
 
+        msc_process_uri(msr->t, r->unparsed_uri, r->method, proto);
         it = process_intervention(msr->t, r);
         if (it != N_INTERVENTION_STATUS)
         {
