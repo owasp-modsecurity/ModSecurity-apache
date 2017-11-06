@@ -398,9 +398,8 @@ static int hook_request_late(request_rec *r)
         return it;
     }
 #endif
-
-
-    msc_process_request_body(msr->t);
+// FIXME: memsc_append_request_body wasn't called yet. Too early?
+//    msc_process_request_body(msr->t);
     it = process_intervention(msr->t, r);
     if (it != N_INTERVENTION_STATUS)
     {

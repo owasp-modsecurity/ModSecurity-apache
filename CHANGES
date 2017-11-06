@@ -1,6 +1,8 @@
 v3.0.x - YYYY-MMM-DD (To be released)
 -------------------------------------
 
+ - Proposed fix for msc_process_request_body call too early
+   [Issue #22 - @victorhora]
  - Adds make install to the build system
    [Issue #36 - @zimmerle, @ROBERT-MCDOWELL]
  - Uses mod_unique if available
