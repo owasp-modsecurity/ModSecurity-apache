@@ -24,7 +24,7 @@ addons:
 
 env:
   - VER_APACHE=2.2.34
-  - VER_APACHE=2.4.27
+  - VER_APACHE=2.4.29
 
 before_script:
   - curl -L https://cpanmin.us | sudo perl - --sudo App::cpanminus
