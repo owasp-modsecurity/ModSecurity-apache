@@ -13,6 +13,9 @@ AC_ARG_WITH(libmodsecurity,
     if test -f "${V3PATH}lib/libmodsecurity.so"; then
       V3LIB="${V3PATH}lib/"
     fi
+    if test -f "${V3PATH}include/modsecurity/modsecurity.h"; then
+      V3INCLUDE="${V3PATH}include/"
+    fi
   fi
 ])
 
