@@ -10,6 +10,9 @@ AC_ARG_WITH(libmodsecurity,
     V3PATH=/usr/local/modsecurity/
   else
     V3PATH="$withval"
+    if test -f "${V3PATH}lib/libmodsecurity.so"; then
+      V3LIB="${V3PATH}lib/"
+    fi
   fi
 ])
 
