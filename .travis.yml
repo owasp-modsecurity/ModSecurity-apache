@@ -29,7 +29,7 @@ env:
 before_script:
   - curl -L https://cpanmin.us | sudo perl - --sudo App::cpanminus
   - cd ..
-  - curl https://www.apache.org/dist/httpd/httpd-${VER_APACHE}.tar.gz > httpd-${VER_APACHE}.tar.gz
+  - curl https://archive.apache.org/dist/httpd/httpd-${VER_APACHE}.tar.gz > httpd-${VER_APACHE}.tar.gz
   - tar xvzf httpd-${VER_APACHE}.tar.gz
   - cd httpd-${VER_APACHE}
   - ./configure  --with-mpm=worker
