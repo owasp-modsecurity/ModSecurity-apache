@@ -7,7 +7,7 @@ AC_ARG_WITH(libmodsecurity,
                             [FILE is the path to libmodsecurity install dir; defaults to "/usr/local/modsecurity".])],
 [
   if test "$withval" = "yes"; then
-    V3PATH=/usr/local/modsecurity/
+    V3PATH=/usr/local/modsecurity
   else
     V3PATH="$withval"
   fi
