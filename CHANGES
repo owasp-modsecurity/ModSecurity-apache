@@ -1,6 +1,8 @@
 v3.0.x - YYYY-MMM-DD (To be released)
 -------------------------------------
 
+ - Uses mod_unique if available
+   [Issue #42 - @zimmerle, @victorhora, @Goron1606]
  - Fix duplicate HTTP protocol strings
    [Issue #21 - @victorhora]
 

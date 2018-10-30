@@ -1,4 +1,6 @@
 
+#include <stdio.h>
+
 #include "mod_security3.h"
 #include "msc_utils.h"
 #include "msc_config.h"
@@ -132,6 +134,8 @@ static void store_tx_context(msc_t *msr, request_rec *r)
 static msc_t *create_tx_context(request_rec *r) {
     msc_t *msr = NULL;
     msc_conf_t *z = NULL;
+    char *unique_id = NULL;
+
     z = (msc_conf_t *)ap_get_module_config(r->per_dir_config,
             &security3_module);
 
@@ -141,7 +145,14 @@ static msc_t *create_tx_context(request_rec *r) {
     }
 
     msr->r = r;
-    msr->t = msc_new_transaction(msc_apache->modsec, (Rules *)z->rules_set, (void *)r);
+    unique_id = getenv("UNIQUE_ID");
+    if (unique_id != NULL || strlen(unique_id) > 0) {
+        msr->t = msc_new_transaction_with_id(msc_apache->modsec,
+            (Rules *)z->rules_set, unique_id, (void *)r);
+    } else {
+        msr->t = msc_new_transaction(msc_apache->modsec,
+            (Rules *)z->rules_set, (void *)r);
+    }
 
     store_tx_context(msr, r);
 
