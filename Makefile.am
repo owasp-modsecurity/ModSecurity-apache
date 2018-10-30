@@ -31,4 +31,9 @@ all:
 test:
 	cd t/ && ./TEST
 
+
+install-exec-hook: $(pkglib_LTLIBRARIES)
+	@APXS@ -i -n mod_security3 ./src/.libs/mod_security3.so
+
+
 .PHONY: all
