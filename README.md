@@ -16,8 +16,6 @@ Notice that this project depends on libmodsecurity rather than ModSecurity (vers
 
 The old version of ModSecurity was origionally designed for and contained within an Apache module. This current version abstracts out some of the details allowing ModSecurity to more easily support multiple platforms and features outside beyond the scope of what Apache internals currently support. As a result using the new libmodsecurity engine is no longer reliant on the use of Apache and can be used to power multiple different connectors. As a result of this the current version is more flexible, has wider support, and allows for the support of new functionality that was not previously possible.
 
-NOTICE: libmodsecurity is not feature complete and it is not considerable
-stable, so use is undertaken at your own risk.
 
 # Compilation
 
