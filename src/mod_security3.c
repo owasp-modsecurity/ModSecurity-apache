@@ -146,7 +146,7 @@ static msc_t *create_tx_context(request_rec *r) {
 
     msr->r = r;
     unique_id = getenv("UNIQUE_ID");
-    if (unique_id != NULL || strlen(unique_id) > 0) {
+    if (unique_id != NULL && strlen(unique_id) > 0) {
         msr->t = msc_new_transaction_with_id(msc_apache->modsec,
             (Rules *)z->rules_set, unique_id, (void *)r);
     } else {
