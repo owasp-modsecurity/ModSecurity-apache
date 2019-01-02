@@ -3,8 +3,6 @@ v3.0.x - YYYY-MMM-DD (To be released)
 
  - Fix: avoids crash if UNIQUE_ID is not set
    [Issue #46 - @Goron1606, @victorhora, @zimmerle]
- - Proposed fix for msc_process_request_body call too early
-   [Issue #22 - @victorhora]
  - Adds make install to the build system
    [Issue #36 - @zimmerle, @ROBERT-MCDOWELL]
  - Uses mod_unique if available
