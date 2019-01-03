@@ -1,3 +1,14 @@
+LoadModule mpm_prefork_module /usr/lib/apache2/modules/mod_mpm_prefork.so
+LoadModule authz_core_module /usr/lib/apache2/modules/mod_authz_core.so
+
+<IfModule mpm_prefork_module>
+    StartServers			 5
+    MinSpareServers		  5
+    MaxSpareServers		 10
+    MaxRequestWorkers	  150
+    MaxConnectionsPerChild   0
+</IfModule>
+
 
 
 CoreDumpDirectory /tmp/
@@ -26,6 +37,7 @@ modsecurity_rules 'SecDebugLogLevel 9'
 </Directory>
 
 <Directory "@ServerRoot@/htdocs/block-evil-4">
+    modsecurity_rules 'SecResponseBodyAccess On'
     modsecurity_rules 'SecRule ARGS "evil" "phase:4,id:114,log,status:403,block,deny"'
 </Directory>
 
@@ -48,6 +60,7 @@ modsecurity_rules 'SecDebugLogLevel 9'
 </Location>
 
 <Location "/block-evil-4-loc">
+    modsecurity_rules 'SecResponseBodyAccess On'
     modsecurity_rules 'SecRule ARGS "evil" "phase:4,id:1134,log,status:402,block,deny"'
 </Location>
 
