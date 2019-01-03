@@ -114,6 +114,9 @@ AC_DEFUN([AX_PROG_APACHE],
     if test -z "$APACHE" ; then
       AC_PATH_PROG(APACHE, httpd, , /usr/local/apache/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/apache2/bin)
     fi
+    if test -z "$APACHE" ; then
+      AC_PATH_PROG(APACHE, apache2, , /usr/local/apache/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/apache2/bin)
+    fi
     AC_SUBST(APACHE)
     if test -z "$APACHE" ; then
         AC_MSG_ERROR("apache server executable not found");
@@ -149,7 +152,12 @@ AC_DEFUN([AX_PROG_APACHE],
     #
     # Find out if .so modules are in libexec/module.so or modules/module.so
     #
-    HTTP_ROOT=`$APACHE -V | grep HTTPD_ROOT | sed -e 's/.*"\(.*\)"/\1/'`
+    if test -f /etc/apache2/envvars
+    then
+        HTTP_ROOT=`. /etc/apache2/envvars && $APACHE -V | grep HTTPD_ROOT | sed -e 's/.*"\(.*\)"/\1/'`
+    else
+        HTTP_ROOT=`$APACHE -V | grep HTTPD_ROOT | sed -e 's/.*"\(.*\)"/\1/'`
+    fi
     AC_MSG_CHECKING(apache modules)
     for dir in libexec modules
     do
