@@ -7,43 +7,24 @@ AC_ARG_WITH(libmodsecurity,
                             [FILE is the path to libmodsecurity install dir; defaults to "/usr/local/modsecurity/".])],
 [
   if test "$withval" = "yes"; then
-    V3PATH=/usr/local/modsecurity/
+    AC_SUBST(CPPFLAGS, "$CPPFLAGS -I/usr/local/modsecurity/include/ -L/usr/local/modsecurity/lib/")
+    V3INCLUDE="/usr/local/modsecurity/include/"
+    V3LIB="/usr/local/modsecurity/lib/"
   else
-    V3PATH="$withval"
-    if test -f "${V3PATH}lib/libmodsecurity.so"; then
-      V3LIB="${V3PATH}lib/"
-    fi
-    if test -f "${V3PATH}include/modsecurity/modsecurity.h"; then
-      V3INCLUDE="${V3PATH}include/"
-    fi
+    AC_SUBST(CPPFLAGS, "$CPPFLAGS -I${withval}/include/ -L${withval}/lib/")
+    V3INCLUDE="${withval}/include/"
+    V3LIB="${withval}/lib/"
   fi
 ])
 
-if test -z "$V3PATH"; then
-  for i in /usr/local/modsecurity/ \
-           /usr/local/sbin \
-           /usr/local/bin \
-           /usr/sbin \
-           /usr/bin \
-           /usr;
-  do
-    if test -f "$i/lib/libmodsecurity.so"; then
-      V3LIB="$i/lib/"
-    fi
-    if test -f "$i/lib64/libmodsecurity.so"; then
-      V3LIB="$i/lib64/"
-    fi
-    if test -f "$i/include/modsecurity/modsecurity.h"; then
-      V3INCLUDE="$i/include/"
-      # TODO: test if V3LIB is set
-      break
-    fi  
-  done
-fi
-if test -n "$V3LIB" -a "$V3LIB" != "no" -a -x "$V3LIB" ; then
-    AC_MSG_NOTICE(found libmodsecurity at $V3LIB)
-else
-    AC_MSG_ERROR(couldn't find libmodsecurity)
-fi
+dnl Check the ModSecurity libraries (modsecurity)
+
+AC_CHECK_LIB([modsecurity], [msc_init], [
+        AC_DEFINE([HAVE_MODSECURITYLIB], [1],
+                [Define to 1 if you have the `libmodsecurity' library (-lmodsecurity).])], [
+        AC_MSG_ERROR([ModSecurity libraries not found!])])
+
+AC_CHECK_HEADERS([modsecurity/modsecurity.h], [], [
+        AC_MSG_ERROR([ModSecurity headers not found...])])
 ])
 
