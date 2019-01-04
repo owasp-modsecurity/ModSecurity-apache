@@ -54,7 +54,7 @@ before_script:
   - export PATH="/usr/local/apache2/bin/:$PATH"
   - ls -la /usr/local/apache2/bin/
   - ls -la /usr/local/apache2/include/
-  - ./configure --with-apxs=/usr/local/apache2/bin/apxs
+  - ./configure --with-apxs=/usr/local/apache2/bin/apxs --with-libmodsecurity=/usr/local/modsecurity
   - make
   - sudo make install
   - pwd
