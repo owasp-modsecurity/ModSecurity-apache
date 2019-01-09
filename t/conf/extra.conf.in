@@ -2,6 +2,8 @@
 
 CoreDumpDirectory /tmp/
 
+Include @ServerRoot@/.././t/conf/modules.conf
+
 LoadModule security3_module "@ServerRoot@/.././src/.libs/mod_security3.so"
 
 

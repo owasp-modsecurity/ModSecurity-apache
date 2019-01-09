@@ -15,6 +15,7 @@ CLEANFILES = \
 	t/logs/* \
 	t/htdocs/index.html \
 	t/conf/extra.conf \
+	t/conf/httpd.conf \
 	t/conf/apache_test_config.pm \
 	t/conf/httpd.conf \
 	src/*.lo \
@@ -29,7 +30,9 @@ all:
 	build/apxs-wrapper
 
 test:
-	cd t/ && ./TEST
+	cd t/ && ./TEST -clean
+	cd t/ && ./TEST -configure
+	cd t/ && ./TEST -httpd_conf conf/httpd.conf -httpd @APACHE@ -apxs @APXS@
 
 
 install-exec-hook: $(pkglib_LTLIBRARIES)
