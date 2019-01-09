@@ -1,7 +1,7 @@
 v3.0.x - YYYY-MMM-DD (To be released)
 -------------------------------------
 
- - Fix libmodsecurity search in autoconf file.
+ - Asorted fixies on libmodsecurity autoconf.
    [Issue #51 - @airween]
  - Fix: avoids crash if UNIQUE_ID is not set
    [Issue #46 - @Goron1606, @victorhora, @zimmerle]
