@@ -13,6 +13,7 @@ AC_PATH_PROGS(PERL, [perl perl5], )
 AC_SUBST(APXS)
 AC_SUBST(V3LIB)
 AC_SUBST(V3INCLUDE)
+AC_SUBST(APACHE)
 
 # Some directories
 MSC_BASE_DIR=`pwd`
@@ -24,6 +25,17 @@ MSC_REGRESSION_CONF_DIR="$MSC_REGRESSION_SERVERROOT_DIR/conf"
 MSC_REGRESSION_LOGS_DIR="$MSC_REGRESSION_SERVERROOT_DIR/logs"
 MSC_REGRESSION_DOCROOT_DIR="$MSC_REGRESSION_SERVERROOT_DIR/htdocs"
 
+if test -f /etc/apache2/envvars
+then
+    SERVER_MPM=`. /etc/apache2/envvars && $APACHE -V | grep Server\ MPM | awk '{print $3}'`
+    SERVER_MPM_MODE=`. /etc/apache2/envvars && $APACHE -M | grep mpm_${SERVER_MPM}_module | awk '{print $2}' | sed -e 's/@<:@\@{:@\@:}@@:>@//g'`
+    SERVER_AUTHZ_MODE=`. /etc/apache2/envvars && $APACHE -M | grep authz_core_module | awk '{print $2}' | sed -e 's/@<:@\@{:@\@:}@@:>@//g'`
+else
+    SERVER_MPM=`$APACHE -V | grep Server\ MPM | awk '{print $3}'`
+    SERVER_MPM_MODE=`$APACHE -M | grep mpm_${SERVER_MPM}_module | awk '{print $2}' | sed -e 's/@<:@\@{:@\@:}@@:>@//g'`
+    SERVER_AUTHZ_MODE=`$APACHE -M | grep authz_core_module | awk '{print $2}' | sed -e 's/@<:@\@{:@\@:}@@:>@//g'`
+fi
+
 AC_SUBST(MSC_BASE_DIR)
 AC_SUBST(MSC_PKGBASE_DIR)
 AC_SUBST(MSC_TEST_DIR)
@@ -33,7 +45,11 @@ AC_SUBST(MSC_REGRESSION_CONF_DIR)
 AC_SUBST(MSC_REGRESSION_LOGS_DIR)
 AC_SUBST(MSC_REGRESSION_DOCROOT_DIR)
 
+AC_SUBST(SERVER_MPM)
+AC_SUBST(SERVER_MPM_MODE)
+AC_SUBST(SERVER_AUTHZ_MODE)
 
+echo "Found Apache with MPM ${SERVER_MPM}, ${SERVER_MPM_MODE}."
 
 APXS_SBINDIR="`$APXS -q SBINDIR`"
 APXS_PROGNAME="`$APXS -q PROGNAME`"
@@ -44,6 +60,18 @@ APXS_LIBEXECDIR="`$APXS -q LIBEXECDIR`"
 if test "xx$APXS_LIBEXECDIR" = "xx"; then APXS_LIBEXECDIR="`$APXS -q LIBDIR`/modules"; fi
 AC_SUBST(APXS_LIBEXECDIR)
 
+# generating apache depends loadable modules
+# authz_core required, if not static
+# one mpm required, if not static
+echo "" > t/conf/modules.conf
+
+if @<:@ ${SERVER_AUTHZ_MODE} == "shared" @:>@; then
+    echo "LoadModule authz_core_module ${APXS_LIBEXECDIR}/mod_authz_core.so" >> t/conf/modules.conf
+fi
+if @<:@ ${SERVER_MPM_MODE} == "shared" @:>@; then
+    echo "LoadModule mpm_${SERVER_MPM}_module ${APXS_LIBEXECDIR}/mod_mpm_${SERVER_MPM}.so" >> t/conf/modules.conf
+fi
+echo "" >> t/conf/modules.conf
 
 
 AC_CONFIG_FILES([\
