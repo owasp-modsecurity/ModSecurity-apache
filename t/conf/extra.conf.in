@@ -2,6 +2,8 @@
 
 CoreDumpDirectory /tmp/
 
+Include @ServerRoot@/.././t/conf/modules.conf
+
 LoadModule security3_module "@ServerRoot@/.././src/.libs/mod_security3.so"
 
 
@@ -26,6 +28,7 @@ modsecurity_rules 'SecDebugLogLevel 9'
 </Directory>
 
 <Directory "@ServerRoot@/htdocs/block-evil-4">
+    modsecurity_rules 'SecResponseBodyAccess On'
     modsecurity_rules 'SecRule ARGS "evil" "phase:4,id:114,log,status:403,block,deny"'
 </Directory>
 
@@ -48,6 +51,7 @@ modsecurity_rules 'SecDebugLogLevel 9'
 </Location>
 
 <Location "/block-evil-4-loc">
+    modsecurity_rules 'SecResponseBodyAccess On'
     modsecurity_rules 'SecRule ARGS "evil" "phase:4,id:1134,log,status:402,block,deny"'
 </Location>
 
