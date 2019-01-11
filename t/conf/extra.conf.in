@@ -20,6 +20,7 @@ modsecurity_rules 'SecDebugLogLevel 9'
 </Directory>
 
 <Directory "@ServerRoot@/htdocs/block-evil-2">
+    modsecurity_rules 'SecRequestBodyAccess On'
     modsecurity_rules 'SecRule ARGS "evil" "phase:2,id:112,log,status:403,block,deny"'
 </Directory>
 
@@ -43,6 +44,7 @@ modsecurity_rules 'SecDebugLogLevel 9'
 </Location>
 
 <Location "/block-evil-2-loc">
+    modsecurity_rules 'SecRequestBodyAccess On'
     modsecurity_rules 'SecRule ARGS "evil" "phase:2,id:112,log,status:402,block,deny"'
 </Location>
 
