@@ -18,11 +18,18 @@ CLEANFILES = \
 	t/conf/httpd.conf \
 	t/conf/apache_test_config.pm \
 	t/conf/httpd.conf \
+	t/conf/mime.types \
+	t/conf/modules.conf \
 	src/*.lo \
-	src/*.slo
+	src/*.slo \
+	src/*.o \
+	src/*.so \
+	src/.libs/*.so
+
 
 CLEANDIRECTORIES = \
-	t/logs
+	t/logs \
+	src/.libs
 
 
 all:
