@@ -31,6 +31,89 @@ $ make
 $ sudo make install
 ```
 
+# Usage
+
+libModSecurity for Apache extends your configuration directives. In order to load the module into Apache add the following directive to your Apache configuration:
+
+```
+LoadModule security3_module modules/mod_security3.so
+```
+
+The module adds new directives to Apache and some them are documented below:
+
+modsecurity
+-----------
+**syntax:** *modsecurity on | off*
+
+**context:** *http, server, location*
+
+**default:** *off*
+
+Turns on or off ModSecurity functionality.
+Note that this configuration directive is no longer related to the SecRule state.
+Instead, it now serves solely as an Apache flag to enable or disable the module.
+
+modsecurity_rules_file
+----------------------
+**syntax:** *modsecurity_rules_file &lt;path to rules file&gt;*
+
+**context:** *http, server, location*
+
+**default:** *no*
+
+Specifies the location of the ModSecurity configuration file, e.g.:
+
+```
+modsecurity on
+modsecurity_rules_file /etc/my_modsecurity_rules.conf;
+```
+
+modsecurity_rules_remote
+------------------------
+**syntax:** *modsecurity_rules_remote &lt;key&gt; &lt;URL to rules&gt;*
+
+**context:** *http, server, location*
+
+**default:** *no*
+
+Specifies from where (on the internet) a modsecurity configuration file will be downloaded.
+It also specifies the key that will be used to authenticate to that server:
+
+```
+modsecurity on
+modsecurity_rules_remote my-server-key https://my-own-server/rules/download;
+```
+
+modsecurity_rules
+-----------------
+**syntax:** *modsecurity_rules &lt;modsecurity rule&gt;*
+
+**context:** *http, server, location*
+
+**default:** *no*
+
+Allows for the direct inclusion of a ModSecurity rule into the Apache configuration.
+The following example is loading rules from a file and injecting specific configurations per directory/alias:
+
+```
+TODO
+```
+
+modsecurity_transaction_id
+--------------------------
+**syntax:** *modsecurity_transaction_id string*
+
+**context:** *http, server, location*
+
+**default:** *no*
+
+Allows to pass transaction ID from Apache instead of generating it in the library.
+This can be useful for tracing purposes, e.g. consider this configuration:
+
+```
+TODO
+```
+
 # Contributing
 
 As an open source project we invite (and encourage) anyone from the community to contribute to our project. This may take the form of: new
