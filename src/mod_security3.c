@@ -399,14 +399,6 @@ static int hook_request_late(request_rec *r)
     }
 #endif
 
-
-    msc_process_request_body(msr->t);
-    it = process_intervention(msr->t, r);
-    if (it != N_INTERVENTION_STATUS)
-    {
-        return it;
-    }
-
     return DECLINED;
 }
 
