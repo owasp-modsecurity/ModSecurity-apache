@@ -10,10 +10,14 @@
  */
 msc_global *msc_apache;
 
+char err_calloc[] = "ModSecurity: can't allocate memory for logmsg.";
 
 void modsecurity_log_cb(void *log, const void* data)
 {
     const char *msg;
+    char *msglog;
+    unsigned int i, j;
+
     if (log == NULL || data == NULL) {
         return;
     }
@@ -21,9 +25,28 @@ void modsecurity_log_cb(void *log, const void* data)
     request_rec *r = (request_rec *) log;
 
 #if AP_SERVER_MAJORVERSION_NUMBER > 1 && AP_SERVER_MINORVERSION_NUMBER > 2
-    ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r,
-        msg,
-        r->status);
+    msglog = calloc(sizeof(char), strlen(msg)*2);
+    if (msglog == NULL) {
+        ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r,
+            err_calloc,
+            r->status);
+    }
+    else {
+        // add % escape to avoid the '%' chars placeholder mark in logmsg
+        j = 0;
+        for(i=0; msg[i] != '\0'; i++) {
+            if (msg[i] == '%') {
+                msglog[j++] = '%';
+            }
+            msglog[j++] = msg[i];
+        }
+        msglog[j] = '\0';
+
+        ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r,
+            msglog,
+            r->status);
+        free(msglog);
+    }
 
 #else
     ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r->server,
