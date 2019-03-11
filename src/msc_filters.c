@@ -11,6 +11,7 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
 
     apr_bucket_brigade *pbbTmp;
     int ret;
+    int body_checked = 0;
 
     msc_t *msr = (msc_t *)f->ctx;
 
@@ -55,6 +56,8 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
         }
 
         msc_append_request_body(msr->t, data, len);
+        msc_process_request_body(msr->t);
+        body_checked = 1;
         it = process_intervention(msr->t, r);
         if (it != N_INTERVENTION_STATUS)
         {
@@ -62,12 +65,12 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
             return send_error_bucket(msr, f, it);
         }
 
-        // FIXME: Now we should have the body. Is this sane?
-        msc_process_request_body(msr->t);
-
         pbktOut = apr_bucket_heap_create(data, len, 0, c->bucket_alloc);
         APR_BRIGADE_INSERT_TAIL(pbbOut, pbktOut);
         apr_bucket_delete(pbktIn);
+    }
+    if (body_checked == 0) {
+        msc_process_request_body(msr->t);
     }
     return APR_SUCCESS;
 }
