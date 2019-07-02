@@ -1,6 +1,7 @@
 
 #include "msc_utils.h"
 
+char logmsg[100];
 
 int id(const char *fn, const char *format, ...)
 {
@@ -20,6 +21,7 @@ apr_status_t send_error_bucket(msc_t *msr, ap_filter_t *f, int status)
 {
     apr_bucket_brigade *brigade = NULL;
     apr_bucket *bucket = NULL;
+    request_rec *r = f->r;
 
     /* Set the status line explicitly for the error document */
     f->r->status_line = ap_get_status_line(status);

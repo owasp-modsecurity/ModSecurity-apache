@@ -11,7 +11,9 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
 
     apr_bucket_brigade *pbbTmp;
     int ret;
+    int it;
     int body_checked = 0;
+    char logmsg[100];
 
     msc_t *msr = (msc_t *)f->ctx;
 
@@ -40,7 +42,6 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
         const char *data;
         apr_size_t len;
         apr_size_t n;
-        int it;
 
         if (APR_BUCKET_IS_EOS(pbktIn))
         {
@@ -62,6 +63,7 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
         if (it != N_INTERVENTION_STATUS)
         {
             ap_remove_output_filter(f);
+            f->r->status = it;
             return send_error_bucket(msr, f, it);
         }
 
@@ -71,6 +73,17 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
     }
     if (body_checked == 0) {
         msc_process_request_body(msr->t);
+        it = process_intervention(msr->t, r);
+        if (it != N_INTERVENTION_STATUS)
+        {
+            ap_remove_output_filter(f);
+            sprintf(logmsg, "it: %d", it);
+            ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r,
+                logmsg,
+                r->status);
+            r->status = it;
+            return send_error_bucket(msr, f, it);
+        }
     }
     return APR_SUCCESS;
 }
