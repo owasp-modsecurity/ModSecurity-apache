@@ -3,7 +3,17 @@
 #include <ctype.h>
 
 #include <modsecurity/modsecurity.h>
+#if defined(MODSECURITY_CHECK_VERSION)
+#if MODSECURITY_VERSION_NUM >= 304010
+#define MSC_USE_RULES_SET 1
+#endif
+#endif
+
+#if defined(MSC_USE_RULES_SET)
+#include <modsecurity/rules_set.h>
+#else
 #include <modsecurity/rules.h>
+#endif
 #include <modsecurity/intervention.h>
 
 #include "apr_buckets.h"
@@ -46,7 +56,7 @@ typedef struct
 
 typedef struct
 {
-    Rules *rules_set;
+    void *rules_set;
     int msc_state;
     char *name_for_debug;
 } msc_conf_t;
