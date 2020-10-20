@@ -14,7 +14,7 @@ Notice that this project depends on libmodsecurity rather than ModSecurity (vers
 
 ### What is the difference between this project and the old ModSecurity module for Apache?
 
-The old version of ModSecurity was origionally designed for and contained within an Apache module. This current version abstracts out some of the details allowing ModSecurity to more easily support multiple platforms and features outside beyond the scope of what Apache internals currently support. As a result using the new libmodsecurity engine is no longer reliant on the use of Apache and can be used to power multiple different connectors. As a result of this the current version is more flexible, has wider support, and allows for the support of new functionality that was not previously possible.
+The old version of ModSecurity was originally designed for and contained within an Apache module. This current version abstracts out some of the details allowing ModSecurity to more easily support multiple platforms and features outside beyond the scope of what Apache internals currently support. As a result using the new libmodsecurity engine is no longer reliant on the use of Apache and can be used to power multiple different connectors. As a result of this the current version is more flexible, has wider support, and allows for the support of new functionality that was not previously possible.
 
 
 # Compilation
@@ -122,7 +122,7 @@ are willing to help with. Thank you.
 
 ## Providing Patches
 
-We prefer to have your patch within the GtiHub infrastructure to facilitate our
+We prefer to have your patch within the GitHub infrastructure to facilitate our
 review work, and our QA integration. GitHub provides an excellent
 documentation on how to perform “Pull Requests”. More information available
 here: https://help.github.com/articles/using-pull-requests/
@@ -186,7 +186,7 @@ security@modsecurity.org to report the issue. Once the problem is fixed we will 
 
 ## Feature Request
 
-We would love to discuss any ideas that you may have for a new feature. Please keep in mind this is a community driven project so be sure to contact the community via the mailing list to get feedback first. Alternativly, feel free to open GitHub issues requesting for new features. Before opening a new issue, please check if there is an existing feature request for the desired functionalityt.
+We would love to discuss any ideas that you may have for a new feature. Please keep in mind this is a community driven project so be sure to contact the community via the mailing list to get feedback first. Alternatively, feel free to open GitHub issues requesting for new features. Before opening a new issue, please check if there is an existing feature request for the desired functionality.
 
 ## Packing
 
