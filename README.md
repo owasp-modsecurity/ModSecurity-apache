@@ -19,7 +19,7 @@ The old version of ModSecurity was originally designed for and contained within 
 
 # Compilation
 
-Before compile this software make sure that you have libmodsecurity installed.
+Before you compile this software make sure that you have libmodsecurity installed.
 You can download it from the ModSecurity git repository. For information pertaining to the compilation and installation of libmodsecurity please consult the documentation provided along with it.
 
 With libmodsecurity installed, you can proceed with the installation of the ModSecurity-apache connector. Run the following commands:
@@ -39,7 +39,7 @@ libModSecurity for Apache extends your configuration directives. In order to loa
 LoadModule security3_module modules/mod_security3.so
 ```
 
-The module adds new directives to Apache and some them are documented below:
+The module adds new directives to Apache and some of them are documented below:
 
 modsecurity
 -----------
@@ -49,7 +49,7 @@ modsecurity
 
 **default:** *off*
 
-Turns on or off ModSecurity functionality.
+Turns on or off the ModSecurity functionality.
 Note that this configuration directive is no longer related to the SecRule state.
 Instead, it now serves solely as an Apache flag to enable or disable the module.
 
