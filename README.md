@@ -5,7 +5,7 @@
 [![](https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png)](https://zenhub.com)
 
 
-The ModSecurity-apache connector is the connection point between Apache and libmodsecurity (ModSecurity v3). Said another way, this project provides a communication channel between Apache and libmodsecurity. This connector is required to use LibModSecurity with Apache. 
+The ModSecurity-apache connector is the connection point between Apache and libmodsecurity (ModSecurity v3). Said another way, this project provides a communication channel between Apache and libmodsecurity. This connector is required to use LibModSecurity with Apache.
 
 The ModSecurity-apache connector takes the form of an Apache module. The module simply serves as a layer of communication between Apache and ModSecurity.
 
@@ -132,7 +132,7 @@ Please respect the coding style. Pull requests can include various commits, so p
 Please respect the coding style in use. Pull requests can include various commits, so
 provide one fix or one functionality per commit. Do not change anything outside
 the scope of your target work (e.g. coding style in a function that you have
-passed by). 
+passed by).
 
 ### Don’t know where to start?
 
@@ -149,7 +149,7 @@ You may also take a look at recent bug reports and open issues to get an idea of
 ### Testing your patch
 
 Along with the manual testing, we strongly recommend that you to use the Apache test
-utility to make sure that you patch does not adversly affect the behavior or performance of Apache. 
+utility to make sure that you patch does not adversly affect the behavior or performance of Apache.
 
 The Apache testing tools are available on: http://httpd.apache.org/test/
 
@@ -158,7 +158,7 @@ To use those tests ....
 
 If you are facing problems getting your added functionality to pass all the  Apache tests, feel free to contact us or the Apache mailing list at: http://httpd.apache.org/lists.html
 
-### Debugging 
+### Debugging
 Because the ModSecurity Apache Connector runs as part of Apache, one needs to debug the Apache process. Debugging may require several steps. In general debugging can be enabled by compiling the Apache connector with debugging as follows:
 ```CFLAGS="-g -O0" ./configure ...normal configure parameters...)```
 
