@@ -9,6 +9,7 @@ LoadModule security3_module "@ServerRoot@/.././src/.libs/mod_security3.so"
 
 # Lets make sure that the engine is on.
 modsecurity_rules 'SecRuleEngine On'
+modsecurity_rules 'SecDefaultAction "phase:2,log,auditlog,deny,status:403"'
 
 # Debug logs
 modsecurity_rules 'SecDebugLog @ServerRoot@/logs/debug_logs.txt'
@@ -20,7 +21,6 @@ modsecurity_rules 'SecDebugLogLevel 9'
 </Directory>
 
 <Directory "@ServerRoot@/htdocs/block-evil-2">
-    modsecurity_rules 'SecRequestBodyAccess On'
     modsecurity_rules 'SecRule ARGS "evil" "phase:2,id:112,log,status:403,block,deny"'
 </Directory>
 
@@ -44,7 +44,6 @@ modsecurity_rules 'SecDebugLogLevel 9'
 </Location>
 
 <Location "/block-evil-2-loc">
-    modsecurity_rules 'SecRequestBodyAccess On'
     modsecurity_rules 'SecRule ARGS "evil" "phase:2,id:112,log,status:402,block,deny"'
 </Location>
 
