@@ -12,6 +12,11 @@ The ModSecurity-apache connector takes the form of an Apache module. The module 
 Notice that this project depends on libmodsecurity rather than ModSecurity (version 2.9 or less).
 
 
+### NOTE:  This project is not production ready
+
+This project should be considered under development and not production ready.  The functionality is not complete and so should not be used.  With Apache HTTP Server, the recommended version of ModSecurity is v2.9.x.
+
+
 ### What is the difference between this project and the old ModSecurity module for Apache?
 
 The old version of ModSecurity was originally designed for and contained within an Apache module. This current version abstracts out some of the details allowing ModSecurity to more easily support multiple platforms and features beyond the scope of what Apache internals currently support. As a result using the new libmodsecurity engine is no longer reliant on the use of Apache and can be used to power multiple different connectors. As a result of this the current version is more flexible, has wider support, and allows for the support of new functionality that was not previously possible.
