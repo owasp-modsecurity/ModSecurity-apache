@@ -1,5 +1,7 @@
 ACLOCAL_AMFLAGS = -I build
 
+postamb = "modsecurity_rules \"SecAuditEngine On\""
+
 MAINTAINERCLEANFILES = \
 	config.log \
         Makefile.in \
@@ -39,7 +41,7 @@ all:
 test:
 	cd t/ && ./TEST -clean
 	cd t/ && ./TEST -configure
-	cd t/ && ./TEST -httpd_conf conf/httpd.conf -httpd @APACHE@ -apxs @APXS@
+	cd t/ && ./TEST -httpd_conf conf/httpd.conf -httpd @APACHE@ -apxs @APXS@ -postamble $(postamb)
 
 
 install-exec-hook: $(pkglib_LTLIBRARIES)

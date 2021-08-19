@@ -10,6 +10,10 @@ LoadModule security3_module "@ServerRoot@/.././src/.libs/mod_security3.so"
 # Lets make sure that the engine is on.
 modsecurity_rules 'SecRuleEngine On'
 
+# Audit logs -- it is actually turned on via postamble
+modsecurity_rules 'SecAuditLog @ServerRoot@/logs/audit_logs.txt'
+modsecurity_rules 'SecAuditLogParts ABIJDEFHZ'
+
 # Debug logs
 modsecurity_rules 'SecDebugLog @ServerRoot@/logs/debug_logs.txt'
 modsecurity_rules 'SecDebugLogLevel 9'
@@ -59,5 +63,46 @@ modsecurity_rules 'SecDebugLogLevel 9'
 
 <Location "/block-evil-5-loc">
     modsecurity_rules 'SecRule ARGS "evil" "phase:5,id:114,log,status:402,block,deny"'
+</Location>
+
+<Location "/00-phases/00-phases_01.html">
+    modsecurity_rules 'SecRequestBodyAccess On'
+    modsecurity_rules 'SecResponseBodyAccess On'
+    modsecurity_rules 'SecRule REQUEST_LINE "^POST" "phase:1,pass,log,auditlog,id:500169"'
+    modsecurity_rules 'SecRule ARGS "val1" "phase:1,pass,log,auditlog,id:500170"'
+    modsecurity_rules 'SecRule RESPONSE_HEADERS:Last-Modified "." "phase:1,pass,log,auditlog,id:500171"'
+    modsecurity_rules 'SecRule RESPONSE_BODY "TEST" "phase:1,pass,log,auditlog,id:500172"'
+</Location>
+<Location "/00-phases/00-phases_02.html">
+    modsecurity_rules 'SecRequestBodyAccess On'
+    modsecurity_rules 'SecResponseBodyAccess On'
+    modsecurity_rules 'SecRule REQUEST_LINE "^POST" "phase:2,pass,log,auditlog,id:500173"'
+    modsecurity_rules 'SecRule ARGS "val1" "phase:2,pass,log,auditlog,id:500174"'
+    modsecurity_rules 'SecRule RESPONSE_HEADERS:Last-Modified "." "phase:2,pass,log,auditlog,id:500175"'
+    modsecurity_rules 'SecRule RESPONSE_BODY "TEST" "phase:2,pass,log,auditlog,id:500176"'
+</Location>
+<Location "/00-phases/00-phases_03.html">
+    modsecurity_rules 'SecRequestBodyAccess On'
+    modsecurity_rules 'SecResponseBodyAccess On'
+    modsecurity_rules 'SecRule REQUEST_LINE "^POST" "phase:3,pass,log,auditlog,id:500177"'
+    modsecurity_rules 'SecRule ARGS "val1" "phase:3,pass,log,auditlog,id:500178"'
+    modsecurity_rules 'SecRule RESPONSE_HEADERS:Last-Modified "." "phase:3,pass,log,auditlog,id:500179"'
+    modsecurity_rules 'SecRule RESPONSE_BODY "TEST" "phase:3,pass,log,auditlog,id:500180"'
+</Location>
+<Location "/00-phases/00-phases_04.html">
+    modsecurity_rules 'SecRequestBodyAccess On'
+    modsecurity_rules 'SecResponseBodyAccess On'
+    modsecurity_rules 'SecRule REQUEST_LINE "^POST" "phase:4,pass,log,auditlog,id:500181"'
+    modsecurity_rules 'SecRule ARGS "val1" "phase:4,pass,log,auditlog,id:500182"'
+    modsecurity_rules 'SecRule RESPONSE_HEADERS:Last-Modified "." "phase:4,pass,log,auditlog,id:500183"'
+    modsecurity_rules 'SecRule RESPONSE_BODY "TEST" "phase:4,pass,log,auditlog,id:500184"'
+</Location>
+<Location "/00-phases/00-phases_05.html">
+    modsecurity_rules 'SecRequestBodyAccess On'
+    modsecurity_rules 'SecResponseBodyAccess On'
+    modsecurity_rules 'SecRule REQUEST_LINE "^POST" "phase:5,pass,log,auditlog,id:500185"'
+    modsecurity_rules 'SecRule ARGS "val1" "phase:5,pass,log,auditlog,id:500186"'
+    modsecurity_rules 'SecRule RESPONSE_HEADERS:Last-Modified "." "phase:5,pass,log,auditlog,id:500187"'
+    modsecurity_rules 'SecRule RESPONSE_BODY "TEST" "phase:5,pass,log,auditlog,id:500188"'
 </Location>
 
