@@ -19,7 +19,7 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
     {
         ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, f->r->server,
                 "ModSecurity: Internal Error: msr is null in input filter.");
-        ap_remove_output_filter(f);
+        ap_remove_input_filter(f);
         return send_error_bucket(msr, f, HTTP_INTERNAL_SERVER_ERROR);
     }
 
@@ -58,7 +58,7 @@ apr_status_t input_filter(ap_filter_t *f, apr_bucket_brigade *pbbOut,
         it = process_intervention(msr->t, r);
         if (it != N_INTERVENTION_STATUS)
         {
-            ap_remove_output_filter(f);
+            ap_remove_input_filter(f);
             return send_error_bucket(msr, f, it);
         }
 
