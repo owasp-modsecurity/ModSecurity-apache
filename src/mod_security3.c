@@ -22,13 +22,11 @@ void modsecurity_log_cb(void *log, const void* data)
 
 #if AP_SERVER_MAJORVERSION_NUMBER > 1 && AP_SERVER_MINORVERSION_NUMBER > 2
     ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r,
-        msg,
-        r->status);
+        "%s", msg);
 
 #else
     ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO, 0, r->server,
-        msg,
-        r->status);
+        "%s", msg);
 #endif
 
 }
